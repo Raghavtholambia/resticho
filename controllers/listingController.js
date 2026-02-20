@@ -5,24 +5,128 @@ const Store = require("../models/store");
 // =========================================
 // ⭐ CREATE LISTING
 // =========================================
+// =========================================
+// ⭐ CREATE LISTING
+// =========================================
+function sanitizeArray(arr) {
+    if (!arr) return [];
+    const arrayData = Array.isArray(arr) ? arr : [arr];
+    return [...new Set(arrayData.filter(item => item && String(item).trim() !== ""))];
+}
+
+function buildPricing(listing) {
+    const p = listing.pricing || {};
+    const num = (v) => {
+        const n = Number(v);
+        return typeof n === "number" && !Number.isNaN(n) ? n : 0;
+    };
+    return {
+        rentalPricePerDay: num(p.rentalPricePerDay),
+        stitchingBasePrice: num(p.stitchingBasePrice),
+        securityDeposit: num(p.securityDeposit),
+    };
+}
+
+function buildStock(listing, businessMode) {
+    const s = listing.stock || {};
+    const total = Math.max(0, parseInt(s.totalQuantity, 10) || 1);
+    const available = Math.max(0, parseInt(s.availableQuantity, 10) ?? total);
+    return {
+        totalQuantity: total,
+        availableQuantity: businessMode === "rental" || businessMode === "both" ? Math.min(available, total) : 1,
+    };
+}
+
+function buildMeasurementFields(listing) {
+    const raw = listing.measurementFields;
+    if (raw && Array.isArray(raw)) {
+        return raw
+            .filter(m => m && m.name && String(m.name).trim())
+            .map(m => ({ name: String(m.name).trim(), required: !!m.required }));
+    }
+    const rawText = listing.measurementFieldsRaw;
+    if (!rawText || typeof rawText !== "string") return [];
+    return rawText
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+            const required = line.endsWith("*");
+            const name = (required ? line.slice(0, -1).trim() : line).trim();
+            return name ? { name, required } : null;
+        })
+        .filter(Boolean);
+}
+
 module.exports.createListing = async (req, res) => {
-    // Use object destructuring for cleaner access
     const { listing } = req.body;
 
-    // 1. Find seller store
     const store = await Store.findOne({ owner: req.user._id });
-
     if (!store) {
         req.flash("error", "You must create a shop before adding listings.");
-        // Ensure you redirect to the correct store creation path
-        return res.redirect("/stores/new"); 
+        return res.redirect("/seller/become-tailor");
     }
 
+    const businessMode = listing.businessMode || "custom";
+
+    if (businessMode === "custom" || businessMode === "both") {
+        listing.fabricOptions = sanitizeArray(listing.fabricOptions);
+        listing.sizeOptions = sanitizeArray(listing.sizeOptions);
+    }
+
+    /* ---------------------------------------------------
+       ✅ Step 1: Convert object sizeInventory → array
+       (if form sends: { S: 10, M: 5, L: 0 })
+    ---------------------------------------------------- */
+    if (req.body.listing.sizeInventory && !Array.isArray(req.body.listing.sizeInventory)) {
+        const rawSizes = req.body.listing.sizeInventory;
+
+        req.body.listing.sizeInventory = Object.entries(rawSizes)
+            .filter(([size, qty]) => parseInt(qty) > 0)
+            .map(([size, qty]) => ({
+                size,
+                totalQuantity: parseInt(qty),
+                availableQuantity: parseInt(qty),
+            }));
+    }
+
+    /* ---------------------------------------------------
+       ✅ Step 2: Clean and normalize inventory
+    ---------------------------------------------------- */
+    const rawSizeInventory = Array.isArray(req.body.listing.sizeInventory)
+        ? req.body.listing.sizeInventory
+        : [];
+
+    const sizeInventory = rawSizeInventory
+        .filter((row) => row && row.size)
+        .map((row) => ({
+            size: row.size,
+            totalQuantity: parseInt(row.totalQuantity),
+            availableQuantity:
+                row.availableQuantity != null
+                    ? parseInt(row.availableQuantity)
+                    : parseInt(row.totalQuantity),
+        }));
+
     const newListing = new Listing({
-        ...listing, // Spread operator to assign all fields from req.body.listing
+        category: listing.category,
+        itemName: listing.itemName,
+        description: listing.description,
+        businessMode,
+        pricing: buildPricing(listing),
+        measurementFields: buildMeasurementFields(listing),
+        sizeInventory,
+        stitchingDurationDays: Math.max(1, parseInt(listing.stitchingDurationDays, 10) || 3),
+        occasions: sanitizeArray(listing.occasions),
+        fabricPricing:
+            listing.fabricPricing && typeof listing.fabricPricing === "object"
+                ? listing.fabricPricing
+                : {},
+        fabricOptions: listing.fabricOptions || [],
+        sizeOptions: listing.sizeOptions || [],
         owner: req.user._id,
         store: store._id,
-        verifiedByAdmin: false // Default to false, awaiting admin approval
+        verifiedByAdmin: false,
     });
 
     if (req.file) {
@@ -31,10 +135,9 @@ module.exports.createListing = async (req, res) => {
             filename: req.file.filename,
         };
     }
-    
-    // Check if the updateAverageRating method should be called here (usually not needed on creation)
-    
+
     await newListing.save();
+
     req.flash("success", "Listing created. Waiting for admin approval.");
     res.redirect("/");
 };
@@ -43,12 +146,9 @@ module.exports.createListing = async (req, res) => {
 // ⭐ GET ALL (ONLY APPROVED LISTINGS SHOWN)
 // =========================================
 module.exports.getAllListings = async (req, res) => {
-    // SECURITY/LOGIC FIX: Only show approved listings to general users
-    const allListing = await Listing.find({ }) 
+    const allListing = await Listing.find({ isActive: { $ne: false }, verifiedByAdmin: true })
         .populate("owner")
         .populate("store");
-
-    // Consider an alternate view for admin if they need to see all.
     res.render("index", { listings: allListing });
 };
 
@@ -62,17 +162,16 @@ module.exports.renderNewForm = async (req, res) => {
         return res.redirect("/login");
     }
 
-    // Role check
-    if (res.locals.currUser.role !== "seller" && res.locals.currUser.role !== "admin") {
-        req.flash("error", "You must be registered as a seller to create a listing.");
+    const isSellerOrTailor = res.locals.currUser.role === "seller" || res.locals.currUser.isTailor || res.locals.currUser.role === "admin";
+    if (!isSellerOrTailor) {
+        req.flash("error", "You must be a tailor or seller to create a listing.");
         return res.redirect("/");
     }
 
-    // Check if seller has a store before allowing listing creation
     const storeExists = await Store.exists({ owner: res.locals.currUser._id });
-    if (!storeExists && res.locals.currUser.role === "seller") {
+    if (!storeExists) {
         req.flash("error", "Please create your shop first.");
-        return res.redirect("/stores/new");
+        return res.redirect("/seller/become-tailor");
     }
 
     res.render("new", { apiKey: res.locals.googleApiKey });
@@ -104,18 +203,22 @@ module.exports.getSingleListing = async (req, res) => {
 
         // 1. Check for Admin Verification
         if (!clickListing.verifiedByAdmin) {
-            const userRole = req.user?.role; // Optional chaining for safety
-
-            if (userRole === 'admin' || clickListing.owner.equals(req.user?._id)) {
-                // Allow Admin or the Owner to view the unverified listing
+            const userRole = req.user?.role;
+            if (userRole === 'admin' || (clickListing.owner && clickListing.owner._id && clickListing.owner._id.equals(req.user?._id))) {
                 req.flash("warning", "This listing is pending admin approval.");
             } else {
-                // Redirect all other users
                 req.flash("error", "This listing is not currently available for viewing.");
                 return res.redirect("/");
             }
         }
-        
+
+        // 2. Hidden by seller: only owner or admin can view
+        const isOwner = clickListing.owner && (clickListing.owner._id ? clickListing.owner._id.equals(req.user?._id) : clickListing.owner.equals(req.user?._id));
+        if (clickListing.isActive === false && !isOwner && req.user?.role !== 'admin') {
+            req.flash("error", "This listing is not available.");
+            return res.redirect("/");
+        }
+
         // After all checks, render the page
         return res.render("Show", {
             clickListing,
@@ -150,25 +253,50 @@ module.exports.renderEditForm = async (req, res) => {
 // =========================================
 // ⭐ UPDATE LISTING
 // =========================================
+// =========================================
+// ⭐ UPDATE LISTING
+// =========================================
 module.exports.updateListing = async (req, res) => {
     const { id } = req.params;
-    const updateData = req.body.listing;
+    const listing = req.body.listing;
 
-    // IMPORTANT: If content is updated, reset approval status
-    updateData.verifiedByAdmin = false; 
+    const businessMode = listing.businessMode || "custom";
+    if (businessMode === "custom" || businessMode === "both") {
+        listing.fabricOptions = sanitizeArray(listing.fabricOptions);
+        listing.sizeOptions = sanitizeArray(listing.sizeOptions);
+    }
+
+    const updateData = {
+        category: listing.category,
+        itemName: listing.itemName,
+        description: listing.description,
+        businessMode,
+        pricing: buildPricing(listing),
+        measurementFields: buildMeasurementFields(listing),
+        stitchingDurationDays: Math.max(1, parseInt(listing.stitchingDurationDays, 10) || 3),
+        occasions: sanitizeArray(listing.occasions),
+        fabricOptions: listing.fabricOptions || [],
+        sizeOptions: listing.sizeOptions || [],
+        verifiedByAdmin: false,
+    };
+
+    const doc = await Listing.findById(id);
+    if (doc && (businessMode === "rental" || businessMode === "both")) {
+        const s = listing.stock || {};
+        const total = Math.max(0, parseInt(s.totalQuantity, 10) ?? doc.stock?.totalQuantity ?? 1);
+        updateData.stock = {
+            totalQuantity: total,
+            availableQuantity: Math.min(doc.stock?.availableQuantity ?? total, total),
+        };
+    }
 
     const updatedListing = await Listing.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
 
     if (req.file) {
-        // Delete old image from Cloudinary (if applicable)
         if (updatedListing.image?.filename) {
             await cloudinary.uploader.destroy(updatedListing.image.filename);
         }
-
-        updatedListing.image = {
-            url: req.file.path,
-            filename: req.file.filename
-        };
+        updatedListing.image = { url: req.file.path, filename: req.file.filename };
         await updatedListing.save();
     }
 
@@ -190,7 +318,7 @@ module.exports.deleteListing = async (req, res) => {
     }
 
     // The findByIdAndDelete hook handles review deletion
-    await Listing.findByIdAndDelete(id); 
+    await Listing.findByIdAndDelete(id);
 
     req.flash("success", "Listing deleted successfully");
     res.redirect("/");
@@ -209,7 +337,7 @@ module.exports.verifyOneListing = async (req, res) => {
 
     req.flash("success", "Listing approved!");
     // Assuming the admin page for listings is /admin/listings
-    res.redirect("/admin/listings"); 
+    res.redirect("/admin/listings");
 };
 
 // =========================================
@@ -226,12 +354,36 @@ module.exports.verifyAllListings = async (req, res) => {
 };
 
 // =========================================
+// ⭐ SELLER: TOGGLE LISTING VISIBILITY (show/hide on store)
+// =========================================
+module.exports.toggleListingVisibility = async (req, res) => {
+    const { id } = req.params;
+    const listing = await Listing.findById(id);
+    if (!listing) {
+        req.flash("error", "Listing not found.");
+        return res.redirect("/");
+    }
+    const isOwner = listing.owner && listing.owner.equals(req.user._id);
+    if (!isOwner && req.user.role !== "admin") {
+        req.flash("error", "Not authorized.");
+        return res.redirect("/");
+    }
+    listing.isActive = !listing.isActive;
+    await listing.save();
+    req.flash("success", listing.isActive ? "Listing is now visible on your store." : "Listing is now hidden from your store.");
+    res.redirect(req.headers.referer || "/listing/" + id);
+};
+
+// =========================================
 // ⭐ Admin → Get unverified listings
 // =========================================
 module.exports.getAllUnverifiedListings = async (req, res) => {
     // Add role check here
 
-    const pendingListings = await Listing.find({ verifiedByAdmin: false })
+    const pendingListings = await Listing.find({
+        verifiedByAdmin: false,
+        rejectedByAdmin: { $ne: true },
+    })
         .populate("owner")
         .populate("store");
 

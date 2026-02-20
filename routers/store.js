@@ -98,11 +98,19 @@ router.put("/:storeId", isLoggedIn, async (req, res) => {
       return res.json({ success: false, message: "Unauthorized" });
     }
 
-    store.shopName    = req.body.shopName || store.shopName;
-    store.slug        = req.body.slug || store.slug;
+    store.shopName = req.body.shopName || store.shopName;
+    store.slug = req.body.slug || store.slug;
     store.description = req.body.description || store.description;
-    store.address     = req.body.address || store.address;
-    store.phone       = req.body.phone || store.phone;
+    store.address = req.body.address || store.address;
+    store.phone = req.body.phone || store.phone;
+    if (req.body.tailorType) store.tailorType = req.body.tailorType;
+    if (Array.isArray(req.body.servicesOffered)) store.servicesOffered = req.body.servicesOffered;
+    if (Array.isArray(req.body.workingDays)) store.workingDays = req.body.workingDays;
+    if (req.body.workingHours && typeof req.body.workingHours === "object") {
+      store.workingHours = { open: req.body.workingHours.open || "", close: req.body.workingHours.close || "" };
+    }
+    if (req.body.averageStitchingTime != null) store.averageStitchingTime = Number(req.body.averageStitchingTime) || 3;
+    if (req.body.productionCapacityPerDay != null) store.productionCapacityPerDay = Math.max(0, parseInt(req.body.productionCapacityPerDay, 10) || 20);
 
     await store.save();
 
@@ -123,11 +131,13 @@ router.get("/:identifier", async (req, res) => {
 
   let store = await Store.findOne({ slug: identifier })
     .populate("owner")
+    .lean(false)
     .exec();
 
   if (!store) {
     store = await Store.findOne({ owner: identifier })
       .populate("owner")
+      .lean(false)
       .exec();
   }
 
@@ -135,30 +145,22 @@ router.get("/:identifier", async (req, res) => {
     return res.status(404).send("Store not found");
   }
 
-  const listings = await Listing.find({ owner: store.owner._id });
- 
-  // ✅ USER SHOP COINS FOR THIS STORE
-  let userShopCoins = 0;
+  // Force reload from DB (100% fresh)
+  store = await Store.findById(store._id)
+    .populate("owner")
+    .exec();
 
-  if (req.user) {
-    const freshUser = await User.findById(req.user._id);
+  console.log("⭐ FRESH STORE:", store);
 
-    const entry = freshUser.shopCoins.find(
-      c => c.storeId.toString() === store._id.toString()
-    );
-
-    userShopCoins = entry ? entry.coins : 0;
-  }
+  const listings = await Listing.find({ owner: store.owner._id, isActive: { $ne: false } });
 
   res.render("store", {
     store,
     owner: store.owner,
     listings,
-    currUser: req.user,
-    userShopCoins   // 👈 PASS THIS
+    currUser: req.user
   });
 });
-
 
 
 module.exports = router;

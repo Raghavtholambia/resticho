@@ -7,7 +7,7 @@ const { storage } = require("../cloudConfig");
 const upload = multer({ storage });
 
 const wrapAsync = require("../utils/wrapAsync");
-const { isLoggedIn, validateListing, listingOwner, isAdmin } = require("../middleware");
+const { isLoggedIn, validateListing, listingOwner, isAdmin, normalizeListingForm } = require("../middleware");
 
 const listingController = require("../controllers/listingController");
 
@@ -26,6 +26,7 @@ router.post(
   "/listing",
   isLoggedIn,
   upload.single("listing[image]"),
+  normalizeListingForm,
   validateListing,
   wrapAsync(listingController.createListing)
 );
@@ -46,9 +47,18 @@ router.put(
   "/listing/:id",
   isLoggedIn,
   upload.single("listing[image]"),
+  normalizeListingForm,
   validateListing,
   listingOwner,
   wrapAsync(listingController.updateListing)
+);
+
+// Toggle listing visibility (show/hide on store) — seller only
+router.post(
+  "/listing/:id/toggle-visibility",
+  isLoggedIn,
+  listingOwner,
+  wrapAsync(listingController.toggleListingVisibility)
 );
 
 // Delete listing

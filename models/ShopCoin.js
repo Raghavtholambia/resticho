@@ -1,18 +1,21 @@
-// const shopCoinSchema = new Schema({
-//   user: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "User",
-//     required: true
-//   },
-//   store: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "Store",
-//     required: true
-//   },
-//   coins: {
-//     type: Number,
-//     default: 0
-//   }
-// });
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-// shopCoinSchema.index({ user: 1, store: 1 }, { unique: true });
+const shopCoinSchema = new Schema({
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    store: {
+        type: Schema.Types.ObjectId,
+        ref: "Store",
+        required: true
+    },
+    coins: {
+        type: Number,
+        default: 0
+    }
+}, { timestamps: true });
+
+module.exports = mongoose.model("ShopCoin", shopCoinSchema);

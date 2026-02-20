@@ -333,7 +333,9 @@
 
 <div class="container">
   <p>
-    <i class="fa-solid fa-ticket"></i> voucher: <%= userShopCoins %>
+    <% if(currUser){ %>
+    <i class="fa-solid fa-ticket"></i> voucher: <%= currUser.ShopCoins %>
+    <% } %>
   </p>
 
   <div class="store-banner fade-in-on-scroll" id="bannerDropZone">
@@ -435,15 +437,22 @@
                   <span class="rating"><i class="fa-solid fa-star"></i>
                     <%= listing.averageRating || "0.0" %>
                   </span>
+                  <% if (store && store.address) { %>
                   <span class="text-muted small">
                     <i class="fa-solid fa-location-dot"></i>
-                    <%= listing.city %>, <%= listing.country %>
+                    <%= store.address %>
                   </span>
+                  <% } %>
                 </div>
               </div>
 
               <div class="card-footer d-flex justify-content-between">
-                <span class="price-tag">₹ <%= listing.pricePerDay %> /day</span>
+                <span class="price-tag">
+                  <% var p = listing.pricing || {}; %>
+                  <% if (listing.businessMode === 'rental' || listing.businessMode === 'both') { %>₹<%= (p.rentalPricePerDay || 0) %>/day<% } %>
+                  <% if (listing.businessMode === 'both') { %> · <% } %>
+                  <% if (listing.businessMode === 'custom' || listing.businessMode === 'both') { %>₹<%= (p.stitchingBasePrice || 0) %> stitch<% } %>
+                </span>
                 <span class="view-text">View details →</span>
               </div>
 

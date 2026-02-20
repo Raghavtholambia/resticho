@@ -56,7 +56,7 @@ io.on("connection", (socket) => {
       console.error("Socket checkUsername error:", err);
     }
   });
-    socket.on("joinListing", listingId => {
+  socket.on("joinListing", listingId => {
     socket.join(listingId);
   });
 
@@ -71,6 +71,8 @@ app.set("views", path.join(__dirname, "views"));
 app.use(expressLayouts);          // ✅ ADD THIS
 app.set("layout", "layout");      // ✅ ADD THIS (views/layout.ejs)
 
+// Parse JSON bodies (for API routes like /api/bookings)
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 
@@ -156,7 +158,7 @@ app.use((req, res, next) => {
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user || null;
 
-    res.locals.notifications = req.user ? req.user.notifications || [] : [];
+  res.locals.notifications = req.user ? req.user.notifications || [] : [];
   res.locals.googleApiKey = process.env.GOOGLE_API_KEY;
   next();
 });
@@ -229,6 +231,10 @@ app.use('/seller', sellerRoutes);
 // Profile routes
 app.use("/profile", profileRoutes);
 
+// User orders dashboard
+const ordersRouter = require("./routers/orders");
+app.use("/", ordersRouter);
+
 // Checkout
 app.use("/checkout", checkoutRoutes);
 
@@ -251,7 +257,6 @@ app.use("/listing/:id", reviewsRouter);
 
 
 // -------------------- Error Handling --------------------
-app.all("*", (req, res, next) => next(new ExpressError(404, "Page not found")));
 app.use((err, req, res, next) => {
   const { statusCode = 500, message = "Something went wrong!" } = err;
   res.status(statusCode).send(message);
@@ -259,10 +264,10 @@ app.use((err, req, res, next) => {
 
 
 
-// const deleteOrphanStores = require("./utils/deleteOrphanStores");
+const deleteOrphanStores = require("./utils/deleteOrphanStores");
 
 
-// deleteOrphanStores(); // run once when server starts
+deleteOrphanStores(); // run once when server starts
 
 
 
@@ -273,7 +278,7 @@ server.listen(3000, () =>
 
 
 
- 
+
 
 
 //  git add .

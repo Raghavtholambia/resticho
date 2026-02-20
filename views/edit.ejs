@@ -1,238 +1,222 @@
 <%- include('./components/header.ejs') %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Edit Property</title>
+  <!DOCTYPE html>
+  <html lang="en">
 
-  <style>
-    #upload-loader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(255, 255, 255, 0.8);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 6px solid #ccc;
-      border-top: 6px solid crimson;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Property</title>
 
-    /* Drag and drop */
-    #dropZone {
-      border: 2px dashed #6c757d;
-      padding: 30px;
-      text-align: center;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    #dropZone.dragover {
-      background: #f1f1f1;
-    }
-  </style>
-</head>
-<body>
+    <style>
+      #upload-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-  <div id="upload-loader" style="display: none;">
-    <div class="spinner"></div>
-  </div>
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 6px solid #ccc;
+        border-top: 6px solid crimson;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
 
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
-        <div class="card shadow-sm">
-          <div class="card-body p-4">
-            <h2 class="text-center text-primary mb-4">Edit Property</h2>
-            
-            <form id="uploadForm" method="POST" action="/listing/<%= newListing._id %>?_method=PUT" enctype="multipart/form-data">
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
 
-              <!-- Category -->
-              <div class="mb-3">
-                <label class="form-label">Category</label>
-                <select name="listing[category]" class="form-select" required>
-                  <% ["Accessories", "Electronics", "Home Appliance", "Furniture", "Others"].forEach(opt => { %>
-                    <option value="<%= opt %>" <%= newListing.category === opt ? "selected" : "" %>>
-                      <%= opt %>
-                    </option>
-                  <% }) %>
-                </select>
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Drag and drop */
+      #dropZone {
+        border: 2px dashed #6c757d;
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      #dropZone.dragover {
+        background: #f1f1f1;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div id="upload-loader" style="display: none;">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <div class="card shadow-sm">
+            <div class="card-body p-4">
+              <h2 class="text-center text-primary mb-4">Edit Property</h2>
+
+              <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                <span class="text-muted">Visibility on store:</span>
+                <form action="/listing/<%= newListing._id %>/toggle-visibility" method="POST" class="d-inline">
+                  <button type="submit" class="btn btn-sm <%= (newListing.isActive !== false) ? 'btn-outline-warning' : 'btn-outline-success' %>">
+                    <%= (newListing.isActive !== false) ? 'Hide from store' : 'Show on store' %>
+                  </button>
+                </form>
               </div>
 
-              <!-- Item Name -->
-              <div class="mb-3">
-                <label class="form-label">Item Name</label>
-                <input type="text" name="listing[itemName]" class="form-control" value="<%= newListing.itemName %>" required />
-              </div>
+              <form id="uploadForm" method="POST" action="/listing/<%= newListing._id %>?_method=PUT"
+                enctype="multipart/form-data">
 
-              <!-- Description -->
-              <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea name="listing[description]" class="form-control" rows="3"><%= newListing.description %></textarea>
-              </div>
-
-              <!-- Current Image -->
-              <% if (newListing.image && newListing.image.url) { %>
-                <div class="mb-3 text-center">
-                  <img src="<%= newListing.image.url %>" alt="Image" class="img-fluid rounded" style="max-height:200px;" />
-                  <p class="small text-muted">Current Image</p>
-                </div>
-              <% } %>
-
-              <!-- ⭐ NEW DRAG & DROP IMAGE UPLOAD ⭐ -->
-              <div class="mb-3">
-                <label class="form-label">Replace Image</label>
-
-                <div id="dropZone">
-                  <p class="text-muted mb-0">Drag & Drop Image Here<br>or Click to Select</p>
+                <!-- Category -->
+                <div class="mb-3">
+                  <label class="form-label">Category</label>
+                  <select name="listing[category]" class="form-select" required>
+                    <% ["Men Ethnic","Women Ethnic","Western Wear","Kids Wear","Wedding Wear","Designer","Accessories"].forEach(function(opt){ %>
+                      <option value="<%= opt %>" <%= newListing.category===opt ? 'selected' : '' %>><%= opt %></option>
+                    <% }); %>
+                  </select>
                 </div>
 
-                <!-- Hidden file input -->
-                <input type="file" id="image" name="listing[image]" accept="image/*" style="display:none;">
-              </div>
+                <!-- Item Name -->
+                <div class="mb-3">
+                  <label class="form-label">Item Name</label>
+                  <input type="text" name="listing[itemName]" class="form-control" value="<%= newListing.itemName %>" required />
+                </div>
 
-              <!-- Price -->
-              <div class="mb-3">
-                <label class="form-label">Price per Day (₹)</label>
-                <input type="number" name="listing[pricePerDay]" class="form-control" value="<%= newListing.pricePerDay %>" required />
-              </div>
+                <!-- Description -->
+                <div class="mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea name="listing[description]" class="form-control" rows="3"><%= newListing.description || '' %></textarea>
+                </div>
 
-              <!-- City -->
-              <div class="mb-3">
-                <label class="form-label">City</label>
-                <input type="text" name="listing[city]" class="form-control" value="<%= newListing.city || '' %>" />
-              </div>
+                <% if (newListing.image && newListing.image.url) { %>
+                  <div class="mb-3 text-center">
+                    <img src="<%= newListing.image.url %>" alt="Image" class="img-fluid rounded" style="max-height:200px;" />
+                    <p class="small text-muted">Current Image</p>
+                  </div>
+                <% } %>
+                <div class="mb-3">
+                  <label class="form-label">Replace Image</label>
+                  <div id="dropZone"><p class="text-muted mb-0">Drag & Drop or Click</p></div>
+                  <input type="file" id="image" name="listing[image]" accept="image/*" style="display:none;">
+                </div>
 
-              <!-- Country -->
-              <div class="mb-3">
-                <label class="form-label">Country</label>
-                <input type="text" name="listing[country]" class="form-control" value="<%= newListing.country || '' %>" />
-              </div>
+                <!-- Business Mode -->
+                <div class="mb-3">
+                  <label class="form-label">Business Mode</label>
+                  <div class="form-check">
+                    <input type="radio" name="listing[businessMode]" value="rental" class="form-check-input" onchange="toggleBM('rental')" <%= newListing.businessMode==='rental' ? 'checked' : '' %>>
+                    <label class="form-check-label">Rental</label>
+                  </div>
+                  <div class="form-check">
+                    <input type="radio" name="listing[businessMode]" value="custom" class="form-check-input" onchange="toggleBM('custom')" <%= newListing.businessMode==='custom' ? 'checked' : '' %>>
+                    <label class="form-check-label">Custom Stitching</label>
+                  </div>
+                  <div class="form-check">
+                    <input type="radio" name="listing[businessMode]" value="both" class="form-check-input" onchange="toggleBM('both')" <%= newListing.businessMode==='both' ? 'checked' : '' %>>
+                    <label class="form-check-label">Both</label>
+                  </div>
+                </div>
 
-              <!-- Address (Detected) -->
-              <div class="mb-3">
-                <label class="form-label">Detected Address</label>
-                <input type="text" id="address-display" class="form-control" value="<%= newListing.address || '' %>" readonly />
-              </div>
+                <div id="rentalSection" class="border rounded p-3 mb-3" style="display:<%= (newListing.businessMode==='rental'||newListing.businessMode==='both') ? 'block' : 'none' %>">
+                  <h6 class="text-muted">Rental</h6>
+                  <div class="mb-2">
+                    <label class="form-label">Rental Price (₹/day)</label>
+                    <input type="number" name="listing[pricing][rentalPricePerDay]" class="form-control" min="0" value="<%= (newListing.pricing && newListing.pricing.rentalPricePerDay) || 0 %>">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Security Deposit (₹)</label>
+                    <input type="number" name="listing[pricing][securityDeposit]" class="form-control" min="0" value="<%= (newListing.pricing && newListing.pricing.securityDeposit) || 0 %>">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Total Quantity</label>
+                    <input type="number" name="listing[stock][totalQuantity]" class="form-control" min="1" value="<%= (newListing.stock && newListing.stock.totalQuantity) || 1 %>">
+                  </div>
+                </div>
 
-              <!-- Hidden fields -->
-              <input type="hidden" id="latitude" name="listing[latitude]" value="<%= newListing.latitude || '' %>">
-              <input type="hidden" id="longitude" name="listing[longitude]" value="<%= newListing.longitude || '' %>">
-              <input type="hidden" id="address" name="listing[address]" value="<%= newListing.address || '' %>">
+                <div id="customSection" class="border rounded p-3 mb-3" style="display:<%= (newListing.businessMode==='custom'||newListing.businessMode==='both') ? 'block' : 'none' %>">
+                  <h6 class="text-muted">Custom Stitching</h6>
+                  <div class="mb-2">
+                    <label class="form-label">Stitching Base Price (₹)</label>
+                    <input type="number" name="listing[pricing][stitchingBasePrice]" class="form-control" min="0" value="<%= (newListing.pricing && newListing.pricing.stitchingBasePrice) || 0 %>">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Delivery Time (days)</label>
+                    <input type="number" name="listing[stitchingDurationDays]" class="form-control" min="1" value="<%= newListing.stitchingDurationDays || 3 %>">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Fabric Options</label>
+                    <input type="text" name="listing[fabricOptions]" class="form-control" value="<%= (newListing.fabricOptions && newListing.fabricOptions.join(', ')) || '' %>" placeholder="Cotton, Silk, Linen">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Size Options</label>
+                    <input type="text" name="listing[sizeOptions]" class="form-control" value="<%= (newListing.sizeOptions && newListing.sizeOptions.join(', ')) || 'S, M, L, XL, Custom' %>">
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Measurement Fields (one per line, * = required)</label>
+                    <textarea name="listing[measurementFieldsRaw]" class="form-control" rows="3"><%= (newListing.measurementFields && newListing.measurementFields.length) ? newListing.measurementFields.map(function(m){ return m.name + (m.required ? ' *' : ''); }).join('\n') : '' %></textarea>
+                  </div>
+                </div>
 
-              <!-- Map -->
-              <div class="mb-3">
-                <label class="form-label">Location on Map</label>
-                <div id="map" style="height:300px; border-radius:10px;"></div>
-              </div>
+                <div class="mb-3">
+                  <label class="form-label">Occasions (comma separated)</label>
+                  <input type="text" name="listing[occasions]" class="form-control" value="<%= (newListing.occasions && newListing.occasions.join(', ')) || '' %>" placeholder="Wedding, Party">
+                </div>
 
-              <!-- Submit -->
-              <div class="d-grid">
-                <button type="submit" class="btn btn-success btn-lg">
-                  <i class="bi bi-pencil-square me-2"></i> Update Property
-                </button>
-              </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-success btn-lg"><i class="bi bi-pencil-square me-2"></i> Update Listing</button>
+                </div>
+              </form>
+              <script>
+                function toggleBM(mode) {
+                  document.getElementById('rentalSection').style.display = (mode === 'rental' || mode === 'both') ? 'block' : 'none';
+                  document.getElementById('customSection').style.display = (mode === 'custom' || mode === 'both') ? 'block' : 'none';
+                }
+              </script>
 
-            </form>
-
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-<!-- Google Maps -->
-<script src="https://maps.googleapis.com/maps/api/js?key=<%= apiKey %>&libraries=places&callback=initMap" async defer></script>
-
-<script>
-  ////////////////////////////////
-  // ⭐ DRAG & DROP IMAGE JS ⭐ //
-  ////////////////////////////////
-
-  const dropZone = document.getElementById("dropZone");
-  const fileInput = document.getElementById("image");
-
-  dropZone.addEventListener("click", () => fileInput.click());
-
-  dropZone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropZone.classList.add("dragover");
-  });
-
-  dropZone.addEventListener("dragleave", () => {
-    dropZone.classList.remove("dragover");
-  });
-
-  dropZone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropZone.classList.remove("dragover");
-    fileInput.files = e.dataTransfer.files;
-
-    dropZone.innerHTML = `<p><strong>${e.dataTransfer.files[0].name}</strong> selected</p>`;
-  });
-
-  fileInput.addEventListener("change", () => {
-    if (fileInput.files.length > 0) {
-      dropZone.innerHTML = `<p><strong>${fileInput.files[0].name}</strong> selected</p>`;
-    }
-  });
-
-
-
-  //////////////////////////
-  // ⭐ GOOGLE MAP LOGIC ⭐ //
-  //////////////////////////
-
-  let map, marker;
-
-  function initMap() {
-    const lat = parseFloat(document.getElementById("latitude").value) || 28.6139;
-    const lng = parseFloat(document.getElementById("longitude").value) || 77.2090;
-
-    const latlng = { lat, lng };
-
-    map = new google.maps.Map(document.getElementById("map"), {
-      center: latlng,
-      zoom: 15,
-    });
-
-    marker = new google.maps.Marker({
-      position: latlng,
-      map,
-      draggable: true,
-    });
-
-    const geocoder = new google.maps.Geocoder();
-
-    google.maps.event.addListener(marker, "dragend", (event) => {
-      document.getElementById("latitude").value = event.latLng.lat();
-      document.getElementById("longitude").value = event.latLng.lng();
-
-      geocoder.geocode({ location: event.latLng }, (results, status) => {
-        if (status === "OK" && results[0]) {
-          document.getElementById("address").value = results[0].formatted_address;
-          document.getElementById("address-display").value = results[0].formatted_address;
+    <script>
+      (function() {
+        var dropZone = document.getElementById("dropZone");
+        var fileInput = document.getElementById("image");
+        if (dropZone && fileInput) {
+          dropZone.addEventListener("click", function() { fileInput.click(); });
+          dropZone.addEventListener("dragover", function(e) { e.preventDefault(); dropZone.classList.add("dragover"); });
+          dropZone.addEventListener("dragleave", function() { dropZone.classList.remove("dragover"); });
+          dropZone.addEventListener("drop", function(e) {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            if (e.dataTransfer.files.length) {
+              fileInput.files = e.dataTransfer.files;
+              dropZone.innerHTML = "<p><strong>" + e.dataTransfer.files[0].name + "</strong> selected</p>";
+            }
+          });
+          fileInput.addEventListener("change", function() {
+            if (fileInput.files.length > 0) dropZone.innerHTML = "<p><strong>" + fileInput.files[0].name + "</strong> selected</p>";
+          });
         }
-      });
-    });
-  }
+      })();
+    </script>
 
-  window.initMap = initMap;
-</script>
+  </body>
 
-</body>
-</html>
+  </html>

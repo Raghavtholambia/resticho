@@ -7,7 +7,7 @@ module.exports = async function deleteOrphanStores() {
 
     for (let store of stores) {
       const ownerExists = await User.exists({ _id: store.owner });
-
+      console.log("Checking store:", store.shopName, "Owner exists:", ownerExists);
       if (!ownerExists) {
         await Store.findByIdAndDelete(store._id);
         console.log(`🗑️ Deleted orphan store: ${store.shopName} (${store._id})`);

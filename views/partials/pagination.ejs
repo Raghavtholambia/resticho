@@ -1,0 +1,22 @@
+<%
+  const currentPage = typeof page !== 'undefined' ? Number(page) : 1;
+  const totalP = typeof totalPages !== 'undefined' ? Number(totalPages) : 1;
+  const baseUrl = typeof baseUrl !== 'undefined' ? baseUrl : '';
+  if (totalP > 1) {
+%>
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center mt-3 mb-0">
+    <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
+      <a class="page-link" href="<%= baseUrl %>?page=<%= currentPage - 1 %>" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    <% for (let p = 1; p <= totalP; p++) { %>
+    <li class="page-item <%= p === currentPage ? 'active' : '' %>">
+      <a class="page-link" href="<%= baseUrl %>?page=<%= p %>"><%= p %></a>
+    </li>
+    <% } %>
+    <li class="page-item <%= currentPage >= totalP ? 'disabled' : '' %>">
+      <a class="page-link" href="<%= baseUrl %>?page=<%= currentPage + 1 %>" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+  </ul>
+</nav>
+<% } %>

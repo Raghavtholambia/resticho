@@ -43,6 +43,7 @@ const userSchema = new Schema(
     googleId: { type: String, unique: true, sparse: true },
 
     isVerified: { type: Boolean, default: false },
+    isBlocked: { type: Boolean, default: false },
     verificationOtp: String,
     otpExpires: Date,
 
@@ -82,6 +83,18 @@ const userSchema = new Schema(
       type: Number,
       default: 100,
     },
+
+    // TAILOR PROFILE
+    isTailor: {
+      type: Boolean,
+      default: false,
+    },
+
+    tailorExperienceYears: Number,
+
+    specialization: [{ type: String, trim: true }],
+
+    portfolioImages: [{ type: String }],
   },
   { timestamps: true }
 );

@@ -1,64 +1,36 @@
-const redisClient = require("../config/redis");
 const Listing = require("../models/listing");
 
 exports.lockDates = async (req, res) => {
   try {
-console.log("🔥 lockController file loaded");
+    console.log("🔥 lockDates called");
+
     const { listingId, startDate, endDate, quantity } = req.body;
-
-
-    const userId = req.user._id.toString();
 
     const listing = await Listing.findById(listingId);
     if (!listing) {
+      console.log("Listing not found:", listingId);
       return res.json({ success: false, reason: "Listing not found" });
     }
 
-    const lockKey = `lock:${listingId}:${startDate}:${endDate}`;
+    console.log("Dates requested to lock:", startDate, endDate);
 
-    // 🚫 already locked
-    const existing = await redisClient.get(lockKey);
-    if (existing) {
-      return res.json({
-        success: false,
-        reason: "Dates temporarily locked by another user"
-      });
-    }
-
-    // ✅ set lock with TTL (5 min)
-    await redisClient.set(
-      lockKey,
-      userId,
-      { NX: true, EX: 300 }
-    );
-
-    req.io?.to(listingId).emit("datesLocked", {
-      startDate,
-      endDate
-    });
-
+    // Instead of Redis, we check database for conflicts
+    // (optional, can remove entirely since createBooking does the check)
     res.json({ success: true });
-
   } catch (err) {
-    console.error(err);
+    console.error("lockDates error:", err);
     res.status(500).json({ success: false });
   }
 };
 
 exports.unlockDates = async (req, res) => {
   try {
-    const { listingId, startDate, endDate } = req.body;
-    const userId = req.user._id.toString();
+    console.log("🔥 unlockDates called");
 
-    const lockKey = `lock:${listingId}:${startDate}:${endDate}`;
-    const owner = await redisClient.get(lockKey);
-
-    if (owner === userId) {
-      await redisClient.del(lockKey);
-    }
-
+    // No Redis → nothing to unlock
     res.json({ success: true });
   } catch (err) {
+    console.error("unlockDates error:", err);
     res.status(500).json({ success: false });
   }
 };

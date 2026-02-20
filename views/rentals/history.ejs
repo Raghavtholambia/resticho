@@ -1,0 +1,154 @@
+<div class="container mt-5 mb-5">
+    <h2 class="mb-4">My Order History</h2>
+
+    <% if (rentals && rentals.length> 0) { %>
+        <% rentals.forEach(rental=> { %>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Order #<%= rental._id.toString().slice(-6).toUpperCase() %></strong>
+                        <span class="text-muted mx-2">|</span>
+                        <small class="text-muted">
+                            <%= new Date(rental.createdAt).toLocaleDateString() %>
+                        </small>
+                    </div>
+
+                    <% if (rental.productId && rental.productId.listingType==='tailoring' ) { %>
+                        <span class="badge bg-info text-dark">Tailoring Order</span>
+                        <% } else { %>
+                            <span class="badge bg-secondary">Rental</span>
+                            <% } %>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <% if(rental.productId && rental.productId.image) { %>
+                                <img src="<%= rental.productId.image.url %>" class="img-fluid rounded" alt="Item Image">
+                                <% } else if (rental.item && rental.item.image) { %>
+                                    <img src="<%= rental.item.image.url %>" class="img-fluid rounded" alt="Item Image">
+                                    <% } else { %>
+                                        <div
+                                            class="bg-light d-flex align-items-center justify-content-center h-100 rounded">
+                                            <i class="fa-solid fa-image text-muted"></i>
+                                        </div>
+                                        <% } %>
+                        </div>
+                        <div class="col-md-6">
+                            <% if (rental.productId) { %>
+                                <h5 class="card-title">
+                                    <a href="/listings/<%= rental.productId._id %>"
+                                        class="text-decoration-none text-dark">
+                                        <%= rental.productId.itemName %>
+                                    </a>
+                                </h5>
+                                <% if (rental.productId.listingType==='tailoring' ) { %>
+                                    <p class="mb-1 text-muted">
+                                        Fabric: <strong>
+                                            <%= rental.selectedFabric %>
+                                        </strong>,
+                                        Size: <strong>
+                                            <%= rental.selectedSize %>
+                                        </strong>
+                                    </p>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Measurements provided</small>
+                                    </div>
+                                    <% } else { %>
+                                        <p class="mb-1">
+                                            <%= new Date(rental.startDate).toLocaleDateString() %> - <%= new
+                                                    Date(rental.endDate).toLocaleDateString() %>
+                                        </p>
+                                        <% } %>
+                                            <% } else if (rental.item) { %>
+                                                <h5 class="card-title">
+                                                    <%= rental.item.itemName %>
+                                                </h5>
+                                                <p class="mb-1">
+                                                    <%= new Date(rental.createdAt).toLocaleDateString() %> (Legacy)
+                                                </p>
+                                                <% } %>
+
+                                                    <p class="fw-bold mt-2">Total: ₹<%= rental.totalPrice %>
+                                                    </p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <!-- TIMELINE UI (Only for Tailoring) -->
+                            <% if (rental.productId && rental.productId.listingType==='tailoring' ) { %>
+                                <div class="timeline-container">
+                                    <!-- States: pending_measurements -> confirmed -> in_stitching -> quality_check -> ready -> delivered -->
+                                    <% const steps=[ { key: 'confirmed' , label: 'Confirmed' }, { key: 'in_stitching' ,
+                                        label: 'Stitching' }, { key: 'quality_check' , label: 'QC' }, { key: 'ready' ,
+                                        label: 'Ready' }, { key: 'delivered' , label: 'Delivered' } ]; // Current status
+                                        index let currentIndex=-1; if (rental.orderStatus==='cancelled' ) {
+                                        currentIndex=-2; // Special case } else { currentIndex=steps.findIndex(s=> s.key
+                                        === rental.orderStatus);
+                                        // Fallback: if 'pending', index is -1 (show none or first)
+                                        if (rental.orderStatus === 'pending' || rental.orderStatus ===
+                                        'pending_measurements') currentIndex = -1;
+                                        }
+                                        %>
+
+                                        <% if (rental.orderStatus==='cancelled' ) { %>
+                                            <div class="alert alert-danger py-2 text-center mb-0">
+                                                <i class="fa-solid fa-circle-xmark"></i> Order Cancelled
+                                            </div>
+                                            <% } else { %>
+                                                <div class="position-relative m-4">
+                                                    <div class="progress" style="height: 2px;">
+                                                        <div class="progress-bar bg-success" role="progressbar"
+                                                            style="width: <%= (Math.max(0, currentIndex) / (steps.length - 1)) * 100 %>%;"
+                                                            aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between position-absolute top-0 w-100"
+                                                        style="margin-top: -10px;">
+                                                        <% steps.forEach((step, idx)=> { %>
+                                                            <div class="text-center" style="width: 20px;">
+                                                                <div class="rounded-circle <%= idx <= currentIndex ? 'bg-success' : 'bg-secondary' %>"
+                                                                    style="width: 12px; height: 12px; margin: 0 auto;">
+                                                                </div>
+                                                                <small
+                                                                    class="<%= idx <= currentIndex ? 'text-success fw-bold' : 'text-muted' %>"
+                                                                    style="font-size: 0.7rem; white-space: nowrap; margin-left: -15px;">
+                                                                    <%= step.label %>
+                                                                </small>
+                                                            </div>
+                                                            <% }) %>
+                                                    </div>
+                                                    <br>
+                                                </div>
+                                                <div class="text-center mt-2">
+                                                    <small class="text-muted">
+                                                        Status: <strong>
+                                                            <%= rental.orderStatus ? rental.orderStatus.replace('_', ' '
+                                                                ).toUpperCase() : 'PENDING' %>
+                                                        </strong>
+                                                    </small>
+                                                </div>
+                                                <% } %>
+
+                                </div>
+                                <% } else { %>
+                                    <!-- Rental Status -->
+                                    <div class="text-center mt-4">
+                                        <span class="badge rounded-pill bg-light text-dark border">
+                                            Rental Status: <%= rental.status || 'Active' %>
+                                        </span>
+                                    </div>
+                                    <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+                <% } else { %>
+                    <div class="text-center p-5 bg-white rounded shadow-sm">
+                        <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
+                        <h4>No orders yet</h4>
+                        <p class="text-muted">Your rental and tailoring history will appear here.</p>
+                        <a href="/" class="btn btn-primary mt-3">Start Shopping</a>
+                    </div>
+                    <% } %>
+</div>

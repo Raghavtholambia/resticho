@@ -11,6 +11,29 @@
       --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
       --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
       --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Measurement Form Styles */
+    .measurement-section {
+      background: #f9f9f9;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      border: 1px solid #e8e8e8;
+    }
+
+    .measurement-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .measurement-input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
 
     * {
@@ -621,45 +644,115 @@
           </h1>
 
           <div class="price-section">
-            <div class="price-label">Daily Rental Price</div>
-            <div>
-              <span class="price-amount">₹<%= clickListing.pricePerDay.toLocaleString("en-IN") %></span>
-              <span class="price-period">/ day</span>
-            </div>
+            <% const pricing = clickListing.pricing || {}; %>
+            <% if (clickListing.businessMode === 'rental' || clickListing.businessMode === 'both') { %>
+              <div class="price-label">Daily Rental</div>
+              <div><span class="price-amount">₹<%= (pricing.rentalPricePerDay || 0).toLocaleString("en-IN") %></span><span class="price-period">/ day</span></div>
+              <% if (pricing.securityDeposit && pricing.securityDeposit > 0) { %><div class="price-label mt-1">Security deposit: ₹<%= pricing.securityDeposit.toLocaleString("en-IN") %></div><% } %>
+            <% } %>
+            <% if (clickListing.businessMode === 'custom' || clickListing.businessMode === 'both') { %>
+              <div class="price-label mt-2">Stitching base</div>
+              <div><span class="price-amount">₹<%= (pricing.stitchingBasePrice || 0).toLocaleString("en-IN") %></span><span class="price-period">/ piece</span></div>
+              <div class="price-label mt-1">Delivery in <%= clickListing.stitchingDurationDays || 3 %> days</div>
+            <% } %>
           </div>
+          <% if ((clickListing.businessMode === 'rental' || clickListing.businessMode === 'both') && clickListing.stock) { %>
+            <span class="stock-badge">In stock: <%= clickListing.stock.availableQuantity %> / <%= clickListing.stock.totalQuantity %></span>
+          <% } %>
+          <% if (clickListing.occasions && clickListing.occasions.length) { %>
+            <div class="mt-2"><small class="text-muted">Occasions: <%= clickListing.occasions.join(', ') %></small></div>
+          <% } %>
 
           <p class="text-muted">
             <%= clickListing.description %>
           </p>
         </div>
 
-        <% if (clickListing.latitude && clickListing.longitude) { %>
+        <% if (clickListing.store && clickListing.store.address) { %>
           <div class="map-section fade-in">
-            <h2 class="section-title">Item Location</h2>
-            <div id="map" style="height: 300px; width: 100%; border-radius: 12px;"></div>
+            <h2 class="section-title">Shop</h2>
+            <p class="text-muted"><%= clickListing.store.address %></p>
           </div>
-          <% } %>
+        <% } %>
       </div>
 
       <div>
         <div class="rental-card fade-in" id="rentalCard">
           <form action="/cart/add/<%= clickListing._id %>" method="POST" id="rentForm">
+            <% const isCustom = clickListing.businessMode === 'custom' || clickListing.businessMode === 'both'; %>
+            <% const isRental = clickListing.businessMode === 'rental' || clickListing.businessMode === 'both'; %>
+            <% const availableQty = (clickListing.stock && clickListing.stock.availableQuantity) || 0; %>
+            <% const outOfStock = isRental && availableQty <= 0; %>
 
-            <div class="form-group-modern">
-              <label class="form-label-modern">Rental Dates</label>
-              <input type="text" class="form-control-modern" id="rentCalendar" placeholder="Select rental dates"
-                readonly>
-              <input type="hidden" name="startDate" id="hiddenStartDate">
-              <input type="hidden" name="endDate" id="hiddenEndDate">
-            </div>
+            <% if (isCustom) { %>
+              <% if (clickListing.fabricOptions && clickListing.fabricOptions.length > 0) { %>
+                <div class="form-group-modern">
+                  <label class="form-label-modern">Select Fabric</label>
+                  <select name="selectedFabric" class="form-control-modern" id="fabricSelect">
+                    <% clickListing.fabricOptions.forEach(function(opt){ %>
+                      <option value="<%= opt %>" data-extra="<%= (clickListing.fabricPricing && (clickListing.fabricPricing.get ? clickListing.fabricPricing.get(opt) : clickListing.fabricPricing[opt])) || 0 %>"><%= opt %></option>
+                    <% }); %>
+                  </select>
+                  <small id="fabricExtraLabel" class="text-muted"></small>
+                </div>
+              <% } %>
+              <% if (clickListing.sizeOptions && clickListing.sizeOptions.length > 0) { %>
+                <div class="form-group-modern">
+                  <label class="form-label-modern">Select Size</label>
+                  <select name="selectedSize" class="form-control-modern">
+                    <% clickListing.sizeOptions.forEach(function(opt){ %><option value="<%= opt %>"><%= opt %></option><% }); %>
+                  </select>
+                </div>
+              <% } %>
+              <% if (clickListing.measurementFields && clickListing.measurementFields.length > 0) { %>
+                <div class="form-group-modern">
+                  <label class="form-label-modern" style="cursor:pointer;color:var(--accent-gold);" onclick="var el=document.getElementById('measurementsForm');el.style.display=el.style.display==='none'?'block':'none';">
+                    <i class="fas fa-ruler-combined"></i> Body Measurements ▼
+                  </label>
+                  <div id="measurementsForm" class="measurement-section" style="display:none;">
+                    <small class="text-muted d-block mb-2">Enter in inches</small>
+                    <div class="measurement-grid">
+                      <% clickListing.measurementFields.forEach(function(m){ %>
+                        <div><label><%= m.name %><%= m.required ? ' *' : '' %></label><input type="number" step="0.1" name="measurements[<%= m.name %>]" class="measurement-input" <%= m.required ? 'required' : '' %>></div>
+                      <% }); %>
+                    </div>
+                  </div>
+                </div>
+              <% } else { %>
+                <div class="form-group-modern">
+                  <label class="form-label-modern" style="cursor:pointer;color:var(--accent-gold);" onclick="var el=document.getElementById('measurementsForm');el.style.display=el.style.display==='none'?'block':'none';">
+                    <i class="fas fa-ruler-combined"></i> Add Measurements (optional) ▼
+                  </label>
+                  <div id="measurementsForm" class="measurement-section" style="display:none;">
+                    <div class="measurement-grid">
+                      <div><label>Chest</label><input type="number" step="0.1" name="measurements[Chest]" class="measurement-input"></div>
+                      <div><label>Waist</label><input type="number" step="0.1" name="measurements[Waist]" class="measurement-input"></div>
+                      <div><label>Shoulder</label><input type="number" step="0.1" name="measurements[Shoulder]" class="measurement-input"></div>
+                      <div><label>Length</label><input type="number" step="0.1" name="measurements[Length]" class="measurement-input"></div>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+              <div class="form-group-modern">
+                <div class="total-label">Delivery in <%= clickListing.stitchingDurationDays || 3 %> days</div>
+              </div>
+            <% } %>
+
+            <% if (isRental) { %>
+              <div class="form-group-modern" id="rentalDatesSection">
+                <label class="form-label-modern">Rental Dates</label>
+                <input type="text" class="form-control-modern" id="rentCalendar" placeholder="Select dates" readonly>
+                <input type="hidden" name="startDate" id="hiddenStartDate">
+                <input type="hidden" name="endDate" id="hiddenEndDate">
+              </div>
+            <% } %>
 
             <div class="form-group-modern">
               <label class="form-label-modern">Quantity</label>
-              <div class="quantity-selector" style="display: flex; align-items: center; gap: 10px;">
-                <button type="button" class="qty-btn" id="qtyMinus" style="cursor: pointer;">−</button>
-                <input type="number" class="qty-input" id="quantity" name="quantity" value="1" min="1"
-                  max="<%= clickListing.stock || 5 %>" readonly style="width: 50px; text-align: center; border: none;">
-                <button type="button" class="qty-btn" id="qtyPlus" style="cursor: pointer;">+</button>
+              <div class="quantity-selector">
+                <button type="button" class="qty-btn" id="qtyMinus">−</button>
+                <input type="number" class="qty-input" id="quantity" name="quantity" value="1" min="1" max="<%= outOfStock ? 0 : Math.max(1, availableQty) %>" readonly style="width:50px;text-align:center;border:none;">
+                <button type="button" class="qty-btn" id="qtyPlus">+</button>
               </div>
             </div>
 
@@ -668,8 +761,8 @@
               <div class="total-amount" id="totalAmount">₹0</div>
             </div>
 
-            <button type="submit" class="btn-rent-now">
-              <i class="fas fa-shopping-cart"></i> Add to Cart
+            <button type="submit" class="btn-rent-now" id="submitRentBtn" <%= outOfStock ? 'disabled' : '' %>>
+              <% if (outOfStock) { %>Out of Stock<% } else if (isCustom && !isRental) { %><i class="fas fa-cut"></i> Place Custom Order<% } else if (isRental && !isCustom) { %><i class="fas fa-shopping-cart"></i> Book Rental<% } else { %><i class="fas fa-shopping-cart"></i> Add to Cart<% } %>
             </button>
           </form>
         </div>
@@ -677,234 +770,58 @@
     </div>
   </div>
 
-<script>
-  /**********************
-   * GLOBAL STATE
-   **********************/
-  const listingId = "<%= clickListing._id %>";
-  const pricePerDay = Number("<%= clickListing.pricePerDay %>");
-
-  let flatpickrInstance = null;
-  let currentLock = null;
-  let disabledRangesFromDB = [];
-  let tempLocks = [];
-
-  /**********************
-   * INIT CALENDAR
-   **********************/
-  fetch(`/api/bookings/listing/${listingId}`)
-    .then(res => res.json())
-    .then(bookings => {
-      disabledRangesFromDB = bookings.map(b => ({
-        from: new Date(b.startDate),
-        to: new Date(b.endDate)
-      }));
-
-      flatpickrInstance = flatpickr("#rentCalendar", {
-        mode: "range",
-        minDate: "today",
-        dateFormat: "Y-m-d",
-        disable: disabledRangesFromDB,
-        onChange: onDateChange
-      });
-    })
-    .catch(err => console.error("Calendar Load Error:", err));
-
-  /**********************
-   * DATE CHANGE HANDLER
-   **********************/
-  async function onDateChange(selectedDates) {
-    if (selectedDates.length !== 2) return;
-
-    const [start, end] = selectedDates;
-    const quantity = parseInt(document.getElementById("quantity").value);
-
-    try {
-      // 🔓 Unlock previous lock
-      if (currentLock) {
-        await unlockDates(currentLock.start, currentLock.end);
-        currentLock = null;
-      }
-
-      // 🔒 Lock new dates
-      const data = await lockDates(start, end, quantity);
-
-      if (!data.success) {
-        throw new Error(data.reason);
-      }
-
-      currentLock = {
-        start: formatDate(start),
-        end: formatDate(end)
-      };
-
-      calculateTotal(start, end);
-      showTempLockMessage();
-
-    } catch (err) {
-      console.warn("Lock failed:", err.message);
-      flatpickrInstance.clear();
-      alert("Selected dates are not available for requested quantity");
-    }
-  }
-
-  /**********************
-   * LOCK / UNLOCK
-   **********************/
-async function lockDates(start, end, quantity) {
-  const res = await fetch("/api/lock-dates", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      listingId,
-      startDate: formatDate(start),
-      endDate: formatDate(end),
-      quantity
-    })
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data.message || "Lock failed");
-  }
-
-  return data;
-}
-
-async function unlockDates(startDate, endDate) {
-  try {
-    await fetch("/api/unlock-dates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listingId, startDate, endDate })
-    });
-  } catch (e) {
-    console.warn("Unlock failed", e);
-  }
-}
-
-
-  function formatDate(date) {
-    return date.toISOString().split("T")[0];
-  }
-
-  /**********************
-   * PRICE CALC
-   **********************/
-  function calculateTotal(start, end) {
-    const diffTime = Math.abs(end - start);
-    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-    const qty = parseInt(document.getElementById("quantity").value) || 1;
-    const total = days * pricePerDay * qty;
-
-    document.getElementById("totalAmount").textContent =
-      "₹" + total.toLocaleString("en-IN");
-  }
-
-  function showTempLockMessage() {
-    document.getElementById("lockStatus").innerText =
-      "⏳ Dates reserved for 5 minutes. Complete booking to confirm.";
-  }
-</script>
-
-<script>
-  /**********************
-   * QUANTITY HANDLING
-   **********************/
-  (function () {
-    const qtyInput = document.getElementById("quantity");
-    const qtyPlus = document.getElementById("qtyPlus");
-    const qtyMinus = document.getElementById("qtyMinus");
-
-    async function relockWithNewQuantity() {
-      if (
-        !flatpickrInstance ||
-        flatpickrInstance.selectedDates.length !== 2 ||
-        !currentLock
-      ) return;
-
-      const [start, end] = flatpickrInstance.selectedDates;
-      const quantity = parseInt(qtyInput.value);
-
-      try {
-        await unlockDates(currentLock.start, currentLock.end);
-        const data = await lockDates(start, end, quantity);
-
-        if (!data.success) {
-          throw new Error();
-        }
-
-        currentLock = {
-          start: formatDate(start),
-          end: formatDate(end)
-        };
-
-        calculateTotal(start, end);
-
-      } catch {
-        alert("Not enough stock for updated quantity");
-        qtyInput.value = quantity - 1;
-      }
-    }
-
-    qtyPlus?.addEventListener("click", async () => {
-      qtyInput.value = parseInt(qtyInput.value) + 1;
-      await relockWithNewQuantity();
-    });
-
-    qtyMinus?.addEventListener("click", async () => {
-      if (parseInt(qtyInput.value) > 1) {
-        qtyInput.value = parseInt(qtyInput.value) - 1;
-        await relockWithNewQuantity();
-      }
-    });
-  })();
-</script>
-
-
-<script>
-  /**********************
-   * SOCKET TEMP LOCKS
-   **********************/
-  try {
-    const socket = io();
-    socket.emit("joinListing", listingId);
-
-  socket.on("datesLocked", ({ startDate, endDate }) => {
-  // Ignore our own lock
-  if (
-    currentLock &&
-    currentLock.start === startDate &&
-    currentLock.end === endDate
-  ) {
-    return;
-  }
-
-  tempLocks.push({
-    from: new Date(startDate),
-    to: new Date(endDate)
-  });
-
-  flatpickrInstance?.set("disable", [
-    ...disabledRangesFromDB,
-    ...tempLocks
-  ]);
-});
-
-  } catch (e) {
-    console.warn("Socket.io not available");
-  }
-</script>
-
-
-  <script src="https://maps.googleapis.com/maps/api/js?key=<%=apiKey%>&libraries=marker&v=beta&callback=initMap" async
-    defer></script>
   <script>
-    function initMap() {
-      const pos = { lat: <%= clickListing.latitude %>, lng: <%= clickListing.longitude %> };
-      const map = new google.maps.Map(document.getElementById("map"), { center: pos, zoom: 15, mapId: "DEMO_MAP_ID" });
-      new google.maps.marker.AdvancedMarkerElement({ map, position: pos, title: "<%= clickListing.itemName %>" });
+    const listingId = "<%= clickListing._id %>";
+    const businessMode = "<%= clickListing.businessMode || 'custom' %>";
+    const pricing = { rentalPricePerDay: Number("<%= (clickListing.pricing && clickListing.pricing.rentalPricePerDay) || 0 %>"), stitchingBasePrice: Number("<%= (clickListing.pricing && clickListing.pricing.stitchingBasePrice) || 0 %>") };
+    let flatpickrInstance = null;
+
+    var rentCal = document.getElementById("rentCalendar");
+    if (rentCal && (businessMode === "rental" || businessMode === "both")) {
+      fetch("/api/bookings/listing/" + listingId).then(function(r){ return r.json(); }).then(function(data){
+        var disabled = (data.blockedDates || []).map(function(b){ return { from: new Date(b.startDate), to: new Date(b.endDate) }; });
+        flatpickrInstance = flatpickr(rentCal, { mode: "range", minDate: "today", dateFormat: "Y-m-d", disable: disabled, onChange: function(dates){ if(dates.length===2){ document.getElementById("hiddenStartDate").value = dates[0].toISOString().split("T")[0]; document.getElementById("hiddenEndDate").value = dates[1].toISOString().split("T")[0]; recalc(); } } });
+      }).catch(function(){});
     }
+
+    function getFabricExtra() {
+      var sel = document.getElementById("fabricSelect");
+      if (!sel || !sel.options[sel.selectedIndex]) return 0;
+      return Number(sel.options[sel.selectedIndex].getAttribute("data-extra")) || 0;
+    }
+
+    function recalc() {
+      var qty = parseInt(document.getElementById("quantity").value, 10) || 1;
+      var total = 0;
+      if (businessMode === "custom" || businessMode === "both") {
+        total = (pricing.stitchingBasePrice + getFabricExtra()) * qty;
+      }
+      if (businessMode === "rental" || businessMode === "both") {
+        var start = document.getElementById("hiddenStartDate") && document.getElementById("hiddenStartDate").value;
+        var end = document.getElementById("hiddenEndDate") && document.getElementById("hiddenEndDate").value;
+        if (start && end) {
+          var days = Math.ceil((new Date(end) - new Date(start)) / (1000*60*60*24)) || 1;
+          total += days * pricing.rentalPricePerDay * qty;
+        }
+      }
+      var el = document.getElementById("totalAmount");
+      if (el) el.textContent = "₹" + (total || 0).toLocaleString("en-IN");
+    }
+
+    (function(){
+      var qtyInput = document.getElementById("quantity");
+      var qtyPlus = document.getElementById("qtyPlus");
+      var qtyMinus = document.getElementById("qtyMinus");
+      var fabricSelect = document.getElementById("fabricSelect");
+      if (fabricSelect) fabricSelect.addEventListener("change", recalc);
+      function up() { var v = parseInt(qtyInput.value,10)||1; var max = parseInt(qtyInput.getAttribute("max"),10)||99; if (v < max) { qtyInput.value = v + 1; recalc(); } }
+      function down() { var v = parseInt(qtyInput.value,10)||1; if (v > 1) { qtyInput.value = v - 1; recalc(); } }
+      if (qtyPlus) qtyPlus.addEventListener("click", up);
+      if (qtyMinus) qtyMinus.addEventListener("click", down);
+      recalc();
+    })();
   </script>
+
+
+
 </body>

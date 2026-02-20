@@ -1,4 +1,3 @@
-
 <form id="uploadForm" action="/listing" method="POST" enctype="multipart/form-data">
 
   <!-- Category -->
@@ -6,11 +5,13 @@
     <label for="category" class="form-label">Category</label>
     <select id="category" name="listing[category]" class="form-select" required>
       <option value="">Select Category</option>
+      <option value="Men Ethnic">Men Ethnic</option>
+      <option value="Women Ethnic">Women Ethnic</option>
+      <option value="Western Wear">Western Wear</option>
+      <option value="Kids Wear">Kids Wear</option>
+      <option value="Wedding Wear">Wedding Wear</option>
+      <option value="Designer">Designer</option>
       <option value="Accessories">Accessories</option>
-      <option value="Electronics">Electronics</option>
-      <option value="Home Appliance">Home Appliance</option>
-      <option value="Furniture">Furniture</option>
-      <option value="Others">Others</option>
     </select>
   </div>
 
@@ -18,168 +19,155 @@
   <div class="mb-3">
     <label for="itemName" class="form-label">Item Name</label>
     <div class="input-group">
-      <span class="input-group-text"><i class="bi bi-tv"></i></span>
-      <input type="text" id="itemName" name="listing[itemName]" class="form-control" placeholder="e.g. AC, TV, Bed" required>
+      <span class="input-group-text"><i class="bi bi-tag"></i></span>
+      <input type="text" id="itemName" name="listing[itemName]" class="form-control" placeholder="e.g. Sherwani, Lehenga" required>
     </div>
   </div>
 
   <!-- Description -->
   <div class="mb-3">
     <label for="description" class="form-label">Description</label>
-    <textarea id="description" name="listing[description]" class="form-control" rows="3" placeholder="Write about the item" required></textarea>
+    <textarea id="description" name="listing[description]" class="form-control" rows="3" placeholder="Describe the outfit" required></textarea>
   </div>
 
-  <!-- Drag & Drop Image Upload -->
+  <!-- Image Upload -->
   <div class="mb-3">
     <label class="form-label">Upload Image</label>
-
-    <div id="dropZone" 
-         style="border: 2px dashed #6c757d; padding: 30px; text-align: center; border-radius: 10px; cursor: pointer;">
+    <div id="dropZone" style="border: 2px dashed #6c757d; padding: 30px; text-align: center; border-radius: 10px; cursor: pointer;">
       <p class="text-muted">Drag & Drop Image Here<br>or Click to Select</p>
     </div>
-
-    <!-- Hidden input -->
     <input type="file" id="image" name="listing[image]" accept="image/*" style="display:none;">
   </div>
 
-  <!-- Price Per Day -->
+  <!-- Business Mode -->
   <div class="mb-3">
-    <label for="pricePerDay" class="form-label">Price (₹ per day)</label>
-    <input type="number" id="pricePerDay" name="listing[pricePerDay]" class="form-control" placeholder="500" min="0" required>
+    <label class="form-label">Business Mode</label>
+    <div class="form-check">
+      <input type="radio" name="listing[businessMode]" id="bmRental" value="rental" class="form-check-input" onchange="toggleBusinessMode('rental')">
+      <label class="form-check-label" for="bmRental">Rental</label>
+    </div>
+    <div class="form-check">
+      <input type="radio" name="listing[businessMode]" id="bmCustom" value="custom" class="form-check-input" onchange="toggleBusinessMode('custom')" checked>
+      <label class="form-check-label" for="bmCustom">Custom Stitching</label>
+    </div>
+    <div class="form-check">
+      <input type="radio" name="listing[businessMode]" id="bmBoth" value="both" class="form-check-input" onchange="toggleBusinessMode('both')">
+      <label class="form-check-label" for="bmBoth">Both</label>
+    </div>
   </div>
 
-  <!-- City -->
-  <div class="mb-3">
-    <label for="city" class="form-label">City</label>
-    <input type="text" id="city" name="listing[city]" class="form-control" placeholder="Delhi" required>
+  <!-- Rental section -->
+  <div id="rentalSection" class="border rounded p-3 mb-3" style="display: none;">
+    <h6 class="text-muted">Rental</h6>
+    <div class="mb-2">
+      <label class="form-label">Rental Price (₹/day)</label>
+      <input type="number" name="listing[pricing][rentalPricePerDay]" class="form-control" min="0" placeholder="0">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Security Deposit (₹)</label>
+      <input type="number" name="listing[pricing][securityDeposit]" class="form-control" min="0" placeholder="0">
+    </div>
+<div class="mb-3">
+  <label class="form-label">Size Inventory</label>
+
+  <div class="row">
+    <% ["XS","S","M","L","XL","XXL"].forEach(function(size){ %>
+      <div class="col-md-4 mb-2">
+        <label><%= size %> Quantity</label>
+        <input 
+          type="number"
+          name="listing[sizeInventory][<%= size %>]"
+          class="form-control"
+          min="0"
+          value="0"
+        >
+      </div>
+    <% }); %>
   </div>
 
-  <!-- Country -->
-  <div class="mb-3">
-    <label for="country" class="form-label">Country</label>
-    <input type="text" id="country" name="listing[country]" class="form-control" placeholder="India" required>
+  <small class="text-muted">
+    Enter stock per size. Leave 0 if not available.
+  </small>
+</div>
   </div>
 
-  <!-- Location (Google Map) -->
-  <div class="mb-3">
-    <label for="map" class="form-label">Shop Location</label>
-    <div id="map" style="height: 300px; width: 100%; border-radius: 10px;"></div>
-    <small class="text-muted">📍 Move the marker to select your shop location</small>
+  <!-- Custom section -->
+  <div id="customSection" class="border rounded p-3 mb-3">
+    <h6 class="text-muted">Custom Stitching</h6>
+    <div class="mb-2">
+      <label class="form-label">Stitching Base Price (₹)</label>
+      <input type="number" name="listing[pricing][stitchingBasePrice]" class="form-control" min="0" placeholder="0">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Delivery Time (days)</label>
+      <input type="number" name="listing[stitchingDurationDays]" class="form-control" min="1" value="3">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Fabric Options (comma separated)</label>
+      <input type="text" name="listing[fabricOptions]" class="form-control" placeholder="Cotton, Silk, Linen">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Size Options (comma separated)</label>
+      <input type="text" name="listing[sizeOptions]" class="form-control" placeholder="S, M, L, XL, Custom" value="S, M, L, XL, Custom">
+    </div>
+    <div class="mb-2">
+      <label class="form-label">Measurement Fields (e.g. Chest, Waist, Shoulder, Length — one per line, add * for required)</label>
+      <textarea name="listing[measurementFieldsRaw]" class="form-control" rows="3" placeholder="Chest *&#10;Waist *&#10;Shoulder&#10;Length"></textarea>
+      <small class="text-muted">Format: "FieldName" or "FieldName *" for required</small>
+    </div>
   </div>
 
-  <!-- Hidden inputs -->
-  <input type="hidden" id="latitude" name="listing[latitude]">
-  <input type="hidden" id="longitude" name="listing[longitude]">
-  <input type="hidden" id="address" name="listing[address]">
+  <!-- Occasions -->
+  <div class="mb-3">
+    <label class="form-label">Occasions (comma separated)</label>
+    <input type="text" name="listing[occasions]" class="form-control" placeholder="Wedding, Party, Festival">
+  </div>
 
   <!-- Submit -->
   <div class="d-grid">
     <button type="submit" class="btn btn-primary btn-lg">
-      <i class="bi bi-check2-circle me-2"></i>
-      Submit Rental Item
+      <i class="bi bi-check2-circle me-2"></i>Submit Listing
     </button>
   </div>
 </form>
 
-<!-- Google Maps Script -->
-<script src="https://maps.googleapis.com/maps/api/js?key=<%= apiKey %>&libraries=places"></script>
+<script>
+  function toggleBusinessMode(mode) {
+    var rental = document.getElementById('rentalSection');
+    var custom = document.getElementById('customSection');
+    if (mode === 'rental') {
+      rental.style.display = 'block';
+      custom.style.display = 'none';
+    } else if (mode === 'custom') {
+      rental.style.display = 'none';
+      custom.style.display = 'block';
+    } else {
+      rental.style.display = 'block';
+      custom.style.display = 'block';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var checked = document.querySelector('input[name="listing[businessMode]"]:checked');
+    if (checked) toggleBusinessMode(checked.value);
+  });
+</script>
 
 <script>
-  ////////////////////////////////
-  // DRAG & DROP IMAGE FUNCTION //
-  ////////////////////////////////
-
-  const dropZone = document.getElementById("dropZone");
-  const fileInput = document.getElementById("image");
-
-  dropZone.addEventListener("click", () => fileInput.click());
-
-  dropZone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropZone.style.background = "#f1f1f1";
-  });
-
-  dropZone.addEventListener("dragleave", () => {
-    dropZone.style.background = "transparent";
-  });
-
-  dropZone.addEventListener("drop", (e) => {
+  var dropZone = document.getElementById("dropZone");
+  var fileInput = document.getElementById("image");
+  dropZone.addEventListener("click", function() { fileInput.click(); });
+  dropZone.addEventListener("dragover", function(e) { e.preventDefault(); dropZone.style.background = "#f1f1f1"; });
+  dropZone.addEventListener("dragleave", function() { dropZone.style.background = "transparent"; });
+  dropZone.addEventListener("drop", function(e) {
     e.preventDefault();
     dropZone.style.background = "transparent";
-
     if (e.dataTransfer.files.length > 0) {
       fileInput.files = e.dataTransfer.files;
-
-      dropZone.innerHTML = `<p><strong>${e.dataTransfer.files[0].name}</strong> selected</p>`;
+      dropZone.innerHTML = "<p><strong>" + e.dataTransfer.files[0].name + "</strong> selected</p>";
     }
   });
-
-  fileInput.addEventListener("change", () => {
-    if (fileInput.files.length > 0) {
-      dropZone.innerHTML = `<p><strong>${fileInput.files[0].name}</strong> selected</p>`;
-    }
+  fileInput.addEventListener("change", function() {
+    if (fileInput.files.length > 0)
+      dropZone.innerHTML = "<p><strong>" + fileInput.files[0].name + "</strong> selected</p>";
   });
-
-
-  ////////////////////////////////
-  // GOOGLE MAPS LOCATION CODE  //
-  ////////////////////////////////
-
-  function initMap() {
-    const defaultLocation = { lat: 28.6139, lng: 77.2090 }; // fallback Delhi
-    const map = new google.maps.Map(document.getElementById("map"), {
-      zoom: 12,
-      center: defaultLocation,
-    });
-
-    const marker = new google.maps.Marker({
-      position: defaultLocation,
-      map: map,
-      draggable: true,
-    });
-
-    const geocoder = new google.maps.Geocoder();
-
-    // Update hidden inputs
-    function updatePosition(lat, lng) {
-      document.getElementById("latitude").value = lat;
-      document.getElementById("longitude").value = lng;
-
-      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-        if (status === "OK" && results[0]) {
-          document.getElementById("address").value = results[0].formatted_address;
-        }
-      });
-    }
-
-    // Use user location if permission allowed
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const userLocation = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          };
-
-          map.setCenter(userLocation);
-          map.setZoom(15);
-          marker.setPosition(userLocation);
-          updatePosition(userLocation.lat, userLocation.lng);
-        },
-        () => {
-          updatePosition(defaultLocation.lat, defaultLocation.lng);
-        }
-      );
-    } else {
-      updatePosition(defaultLocation.lat, defaultLocation.lng);
-    }
-
-    // When marker moves
-    google.maps.event.addListener(marker, "dragend", () => {
-      const pos = marker.getPosition();
-      updatePosition(pos.lat(), pos.lng());
-    });
-  }
-
-  window.onload = initMap;
 </script>

@@ -1,0 +1,22 @@
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+  <% if (typeof success !== 'undefined' && success && success.length) { %>
+    <% success.forEach(msg => { %>
+    <div class="toast align-items-center text-bg-success border-0 mb-2 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"><%= msg %></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    <% }); %>
+  <% } %>
+  <% if (typeof error !== 'undefined' && error && error.length) { %>
+    <% error.forEach(msg => { %>
+    <div class="toast align-items-center text-bg-danger border-0 mb-2 show" role="alert">
+      <div class="d-flex">
+        <div class="toast-body"><%= msg %></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    <% }); %>
+  <% } %>
+</div>

@@ -1,0 +1,21 @@
+<%
+  const modalId = typeof id !== 'undefined' ? id : 'confirmModal';
+  const titleText = typeof title !== 'undefined' ? title : 'Confirm';
+  const bodyText = typeof body !== 'undefined' ? body : 'Are you sure?';
+  const confirmLabel = typeof confirmLabel !== 'undefined' ? confirmLabel : 'Confirm';
+%>
+<div class="modal fade" id="<%= modalId %>" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><%= titleText %></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body"><p class="mb-0"><%= bodyText %></p></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="<%= modalId %>ConfirmBtn"><%= confirmLabel %></button>
+      </div>
+    </div>
+  </div>
+</div>

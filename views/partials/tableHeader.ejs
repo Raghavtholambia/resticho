@@ -1,0 +1,14 @@
+<%
+  const cols = Array.isArray(columns) ? columns : [];
+%>
+<thead class="table-light">
+  <tr>
+    <% cols.forEach(col => {
+      const isObj = col && typeof col === 'object';
+      const label = isObj ? (col.label || '') : col;
+      const align = isObj && col.align ? col.align : 'start';
+    %>
+    <th scope="col" class="text-<%= align %>"><%= label %></th>
+    <% }); %>
+  </tr>
+</thead>

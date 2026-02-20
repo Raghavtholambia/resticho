@@ -12,6 +12,8 @@ const Razorpay = require("razorpay");
 const Listing = require("../models/listing");
 const Store = require("../models/store");
 const Transaction = require("../models/Transactions");
+const Booking = require("../models/Booking");
+const Cart = require("../models/cart");
 
 const {
   awardBuyerCoins,
@@ -67,7 +69,7 @@ async function getListingDetails(listingId) {
 // ======================================================
 async function processPayment(req, res, method) {
   try {
-    const { listingId, amount } = req.body;
+    const { listingId, amount, startDate, endDate } = req.body;
 
     if (!listingId) return res.status(400).json({ success: false, message: "listingId missing" });
     if (!amount) return res.status(400).json({ success: false, message: "Amount missing" });
@@ -80,6 +82,25 @@ async function processPayment(req, res, method) {
 
     if (!sellerId) return res.status(404).json({ success: false, message: "Seller not found" });
     if (!storeId) return res.status(404).json({ success: false, message: "Store not found for this listing" });
+
+    const isRental = listing.businessMode === "rental" || listing.businessMode === "both";
+    const isCustom = listing.businessMode === "custom" || listing.businessMode === "both";
+
+    // Rental: require dates and check stock availability (will reserve when seller confirms)
+    if (isRental) {
+      const available = (listing.stock && listing.stock.availableQuantity) ?? 0;
+      if (available <= 0) return res.status(400).json({ success: false, message: "Item is out of stock for rental" });
+      if (!startDate || !endDate) return res.status(400).json({ success: false, message: "Rental dates required" });
+    }
+    
+    // Custom: check capacity availability (will reserve when seller confirms)
+    if (isCustom && listing.store) {
+      const store = await Store.findById(listing.store);
+      const capacityLimit = store.productionCapacityPerDay ?? store.maxConcurrentOrders ?? 20;
+      if (store.activeOrderCount >= capacityLimit) {
+        return res.status(400).json({ success: false, message: "Store is at full capacity. Please try again later." });
+      }
+    }
 
 
 // ======================================================
@@ -144,10 +165,54 @@ await Notification.create({
   user: sellerId,
   item: listing._id,
   message: `You received a rental order for ${listing.itemName}. Earnings: ₹${amount}`,
-  link: `/store/orders`,
+  link: `/seller/orders`,
   seller: req.user._id,
 });
 
+// ======================================================
+// 📦 CREATE BOOKING (so order shows in User Orders + Seller Dashboard)
+// ======================================================
+const ownerId = listing.owner && listing.owner._id ? listing.owner._id : listing.owner;
+const renterId = req.user._id;
+
+if (isRental && startDate && endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  await Booking.create({
+    productId: listingId,
+    renterId,
+    ownerId,
+    startDate: start,
+    endDate: end,
+    totalPrice: amount,
+    status: "pending", // Seller needs to confirm
+    orderStatus: "pending", // Seller needs to confirm
+  });
+  // Don't decrement stock yet - wait for seller confirmation
+} else {
+  // Custom or single payment without dates: treat as custom order
+  const start = new Date();
+  const end = new Date(Date.now() + (listing.stitchingDurationDays || 3) * 24 * 60 * 60 * 1000);
+  await Booking.create({
+    productId: listingId,
+    renterId,
+    ownerId,
+    startDate: start,
+    endDate: end,
+    totalPrice: amount,
+    status: "pending", // Seller needs to confirm
+    orderStatus: "pending_measurements", // Awaiting measurements/confirmation
+  });
+  // Don't increment capacity yet - wait for seller confirmation
+}
+
+// Remove paid item from cart
+const cart = await Cart.findOne({ user: req.user._id });
+if (cart && cart.items && cart.items.length) {
+  cart.items = cart.items.filter(item => item.product && item.product.toString() !== listingId.toString());
+  cart.grandTotal = cart.items.reduce((acc, item) => acc + (item.total || 0), 0);
+  await cart.save();
+}
 
 // ======================================================
 // ✅ SUCCESS RESPONSE

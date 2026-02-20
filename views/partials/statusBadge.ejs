@@ -1,0 +1,55 @@
+<%
+  const rawStatus = (typeof status !== 'undefined' && status) ? String(status) : '';
+  const s = rawStatus.toLowerCase().replace(/_/g, '');
+  let cls = 'bg-secondary';
+  let label = rawStatus;
+
+  switch (s) {
+    case 'pending':
+    case 'pendingmeasurements':
+      cls = 'bg-warning text-dark';
+      label = s === 'pendingmeasurements' ? 'Pending' : 'Pending';
+      break;
+    case 'confirmed':
+      cls = 'bg-info text-dark';
+      label = 'Confirmed';
+      break;
+    case 'inprogress':
+      cls = 'bg-primary';
+      label = 'In Progress';
+      break;
+    case 'institching':
+    case 'qualitycheck':
+      cls = 'bg-primary';
+      label = s === 'institching' ? 'In Stitching' : 'Quality Check';
+      break;
+    case 'ready':
+      cls = 'bg-primary';
+      label = 'Ready';
+      break;
+    case 'shipped':
+    case 'delivered':
+      cls = 'bg-success';
+      label = s === 'shipped' ? 'Shipped' : 'Delivered';
+      break;
+    case 'completed':
+      cls = 'bg-success';
+      label = 'Completed';
+      break;
+    case 'cancelled':
+      cls = 'bg-danger';
+      label = 'Cancelled';
+      break;
+    case 'verified':
+      cls = 'bg-success';
+      label = 'Verified';
+      break;
+    case 'unverified':
+      cls = 'bg-secondary';
+      label = 'Unverified';
+      break;
+    default:
+      label = rawStatus || 'N/A';
+  }
+%>
+<span class="badge rounded-pill <%= cls %>"><%= label %></span>

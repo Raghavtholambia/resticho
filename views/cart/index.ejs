@@ -38,7 +38,7 @@
                 </div>
 
                 <p class="text-muted mb-1">
-                  Price/Day: ₹<%= item.product.pricePerDay %>
+                  Price: ₹<%= (item.price || (item.product && item.product.pricing && (item.product.pricing.rentalPricePerDay || item.product.pricing.stitchingBasePrice)) || 0).toLocaleString('en-IN') %>
                 </p>
                 <p class="mb-1">
                   Quantity: <%= item.quantity %>

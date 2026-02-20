@@ -17,7 +17,8 @@ module.exports.redeemItem = async (req, res) => {
     }
 
     const storeId = listing.store._id;
-    const totalPrice = listing.pricePerDay; // For simplicity, item price = pricePerDay
+    const p = listing.pricing || {};
+    const totalPrice = p.rentalPricePerDay || p.stitchingBasePrice || 0;
 
     // 1️⃣ Check SC balance
     let shopCoin = await ShopCoin.findOne({ user: userId, store: storeId });

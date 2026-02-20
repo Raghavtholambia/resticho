@@ -1,0 +1,58 @@
+<%- include('../components/header') %>
+<%- include('../partials/toasts') %>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">My Orders</h3>
+  </div>
+
+  <ul class="nav nav-tabs mb-3" id="ordersTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#activeOrders" type="button" role="tab">Active</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completedOrders" type="button" role="tab">Completed</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelledOrders" type="button" role="tab">Cancelled</button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="activeOrders" role="tabpanel" aria-labelledby="active-tab">
+      <% if (activeOrders && activeOrders.length) { %>
+        <% activeOrders.forEach(order => { %>
+          <%- include('../partials/orderCard', { order }) %>
+        <% }) %>
+      <% } else { %>
+        <div class="alert alert-light border text-center">No active orders yet.</div>
+      <% } %>
+    </div>
+
+    <div class="tab-pane fade" id="completedOrders" role="tabpanel" aria-labelledby="completed-tab">
+      <% if (completedOrders && completedOrders.length) { %>
+        <% completedOrders.forEach(order => { %>
+          <%- include('../partials/orderCard', { order }) %>
+        <% }) %>
+      <% } else { %>
+        <div class="alert alert-light border text-center">You have no completed orders yet.</div>
+      <% } %>
+    </div>
+
+    <div class="tab-pane fade" id="cancelledOrders" role="tabpanel" aria-labelledby="cancelled-tab">
+      <% if (cancelledOrders && cancelledOrders.length) { %>
+        <% cancelledOrders.forEach(order => { %>
+          <%- include('../partials/orderCard', { order }) %>
+        <% }) %>
+      <% } else { %>
+        <div class="alert alert-light border text-center">You have no cancelled orders.</div>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (typeof page !== 'undefined' && typeof totalPages !== 'undefined') { %>
+    <%- include('../partials/pagination', { page, totalPages }) %>
+  <% } %>
+</div>
+
+<%- include('../components/footer') %>

@@ -159,7 +159,14 @@
                   <div class="place-title"><%= listing.itemName %></div>
 
                   <div class="price-text">
-                    ₹<%= listing.pricePerDay %> per day
+                    <% var p = listing.pricing || {}; %>
+                    <% if (listing.businessMode === 'rental' || listing.businessMode === 'both') { %>
+                      ₹<%= (p.rentalPricePerDay || 0).toLocaleString('en-IN') %>/day
+                    <% } %>
+                    <% if (listing.businessMode === 'both') { %> · <% } %>
+                    <% if (listing.businessMode === 'custom' || listing.businessMode === 'both') { %>
+                      ₹<%= (p.stitchingBasePrice || 0).toLocaleString('en-IN') %> stitch
+                    <% } %>
                   </div>
 
                   <div class="rating-text">

@@ -52,20 +52,29 @@ router.post("/add/:id",isLoggedIn, async (req, res) => {
     const product = await Listing.findById(productId);
     if (!product) return res.status(404).send("Product not found");
 
-    // Find or create cart
+    const pricing = product.pricing || {};
+    const isRental = product.businessMode === "rental" || product.businessMode === "both";
+    const price = isRental ? (pricing.rentalPricePerDay || 0) : (pricing.stitchingBasePrice || 0);
+
+    // Basic guard: if totalStock is 0, block rentals from cart
+    const totalStock = product.totalStock || 0;
+    if (isRental && totalStock <= 0) {
+      req.flash("error", "This item is out of stock for rental. You cannot add it to cart.");
+      return res.redirect("/listing/" + productId);
+    }
+
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
       cart = new Cart({ user: req.user._id, items: [] });
     }
 
-    // Add new item
-cart.items.push({
-  product: product._id,
-  price: product.pricePerDay,
-  quantity: quantity || 1,
-  startDate: startDate ? new Date(startDate) : new Date(),
-  endDate: endDate ? new Date(endDate) : new Date(),
-});
+    cart.items.push({
+      product: product._id,
+      price: price,
+      quantity: quantity || 1,
+      startDate: startDate ? new Date(startDate) : new Date(),
+      endDate: endDate ? new Date(endDate) : new Date(),
+    });
 
     console.log(cart.item);
     
@@ -74,8 +83,8 @@ cart.items.push({
     res.redirect("/cart/view");
   } catch (err) {
     console.error("Error adding to cart:", err);
-    res.status(500).send("Error adding to cart");
-    res.redirect(`/add/${req.params.id}`)
+    req.flash("error", "Could not add to cart.");
+    res.redirect("/listing/" + req.params.id);
   }
 });
 

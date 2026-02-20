@@ -1,144 +1,252 @@
-<%- include('../components/header') %>
+<%- include('../partials/toasts') %>
 
-<div class="container-fluid mt-4">
-  <h1 class="mb-4 text-center fw-bold text-primary">Admin Dashboard</h1>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Admin Dashboard</h3>
+  </div>
 
-  <div class="row g-4">
+  <div class="row mb-4">
+    <%- include('../partials/statsCard', { title: 'Total Users', value: totalUsers || 0, iconClass: 'bi-people', variant: 'primary' }) %>
+    <%- include('../partials/statsCard', { title: 'Total Tailors', value: totalTailors || 0, iconClass: 'bi-scissors', variant: 'info' }) %>
+    <%- include('../partials/statsCard', { title: 'Platform Revenue', value: '₹' + (totalRevenue || 0).toLocaleString('en-IN'), iconClass: 'bi-currency-exchange', variant: 'success' }) %>
+    <%- include('../partials/statsCard', { title: 'Commission Earned', value: '₹' + (platformCommission || 0).toLocaleString('en-IN'), iconClass: 'bi-piggy-bank', variant: 'warning' }) %>
+  </div>
 
-    <!-- USERS -->
-    <div class="col-md-6">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-primary text-white d-flex justify-content-between">
-          <span><i class="fa fa-users"></i> Users</span>
-          <span class="fw-bold">
-            <a href="javascript:void(0)" class="text-white text-decoration-underline" onclick="toggleSection('usersList')">
-              <%= usersCount %>
-            </a>
-          </span>
-        </div>
+  <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+    <li class="nav-item">
+      <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#usersTab" type="button" role="tab">Users</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="stores-tab" data-bs-toggle="tab" data-bs-target="#storesTab" type="button" role="tab">Stores</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="listings-tab" data-bs-toggle="tab" data-bs-target="#listingsTab" type="button" role="tab">Listings</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#ordersTab" type="button" role="tab">Orders</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pendingTab" type="button" role="tab">Pending Approval</button>
+    </li>
+  </ul>
 
-        <div class="card-body" id="usersList" style="display:none;">
-          <h5 class="fw-bold mb-3">All Users</h5>
-          <ul class="list-group">
-            <% users.forEach(user => { %>
-              <li class="list-group-item d-flex justify-content-between" id="user-<%= user._id %>">
-                <span>
-                  <a href="/admin/user/<%= user._id %>" class="text-decoration-none">
-                    <i class="fa fa-user-circle text-primary"></i> 
-                    <%= user.username %> - <%= user.email %>
-                  </a>
-                </span>
-                <button class="btn btn-sm btn-danger delete-btn" data-id="<%= user._id %>">
-                  <i class="fa fa-trash"></i> Delete
-                </button>
-              </li>
-            <% }) %>
-          </ul>
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="usersTab" role="tabpanel">
+      <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">Users</h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <%- include('../partials/tableHeader', { columns: [
+                { label: 'Username', align: 'start' },
+                { label: 'Email', align: 'start' },
+                { label: 'Role', align: 'start' },
+                { label: 'Verified', align: 'start' },
+                { label: 'Actions', align: 'end' }
+              ] }) %>
+              <tbody>
+                <% const allUsers = users || []; %>
+                <% if (allUsers.length) { %>
+                  <% allUsers.forEach(u => { %>
+                  <tr>
+                    <td><%= u.username %></td>
+                    <td><%= u.email %></td>
+                    <td><%= u.role %></td>
+                    <td>
+                      <% if (u.isVerified) { %><span class="badge bg-success">Verified</span><% } else { %><span class="badge bg-secondary">Unverified</span><% } %>
+                    </td>
+                    <td class="text-end">
+                      <% if (u.role !== 'admin') { %>
+                        <form action="/admin/users/<%= u._id %>/make-admin" method="POST" class="d-inline">
+                          <button type="submit" class="btn btn-sm btn-outline-primary">Make Admin</button>
+                        </form>
+                      <% } %>
+                      <% if (u.isBlocked) { %>
+                        <form action="/admin/users/<%= u._id %>/unblock" method="POST" class="d-inline">
+                          <button type="submit" class="btn btn-sm btn-outline-success">Unblock</button>
+                        </form>
+                      <% } else if (u.role !== 'admin') { %>
+                        <form action="/admin/users/<%= u._id %>/block" method="POST" class="d-inline">
+                          <button type="submit" class="btn btn-sm btn-outline-danger">Block</button>
+                        </form>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr><td colspan="5" class="text-center text-muted py-4">No users found.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- SELLERS -->
-    <div class="col-md-6">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-success text-white d-flex justify-content-between">
-          <span><i class="fa fa-store"></i> Sellers</span>
-          <span class="fw-bold">
-            <a href="javascript:void(0)" class="text-white text-decoration-underline" onclick="toggleSection('sellersList')">
-              <%= sellersCount %>
-            </a>
-          </span>
-        </div>
-
-        <div class="card-body" id="sellersList" style="display:none;">
-          <h5 class="fw-bold mb-3">All Sellers</h5>
-          <ul class="list-group">
-            <% sellers.forEach(seller => { %>
-              <li class="list-group-item d-flex justify-content-between" id="user-<%= seller._id %>">
-                <span>
-                  <a href="/store/<%= seller._id %>" class="text-decoration-none">
-                    <i class="fa fa-user-tie text-success"></i> 
-                    <%= seller.username %> - <%= seller.email %>
-                  </a>
-                </span>
-                <button class="btn btn-sm btn-danger delete-btn" data-id="<%= seller._id %>">
-                  <i class="fa fa-trash"></i> Delete
-                </button>
-              </li>
-            <% }) %>
-          </ul>
+    <div class="tab-pane fade" id="storesTab" role="tabpanel">
+      <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">Stores</h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <%- include('../partials/tableHeader', { columns: [
+                { label: 'Store Name', align: 'start' },
+                { label: 'Owner', align: 'start' },
+                { label: 'Rating', align: 'start' },
+                { label: 'Approved', align: 'start' },
+                { label: 'Actions', align: 'end' }
+              ] }) %>
+              <tbody>
+                <% const storeList = stores || []; %>
+                <% if (storeList.length) { %>
+                  <% storeList.forEach(s => { %>
+                  <tr>
+                    <td><%= s.shopName %></td>
+                    <td><%= (s.owner && s.owner.username) ? s.owner.username : '' %></td>
+                    <td><%= (s.rating != null && s.rating.toFixed) ? s.rating.toFixed(1) : (s.rating || 0) %></td>
+                    <td>
+                      <% if (s.isApproved) { %><span class="badge bg-success">Approved</span><% } else { %><span class="badge bg-warning text-dark">Pending</span><% } %>
+                    </td>
+                    <td class="text-end">
+                      <% if (!s.isApproved) { %>
+                        <form action="/admin/stores/<%= s._id %>/approve" method="POST" class="d-inline">
+                          <button type="submit" class="btn btn-sm btn-outline-success">Approve</button>
+                        </form>
+                      <% } %>
+                      <form action="/admin/stores/<%= s._id %>/remove" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                      </form>
+                    </td>
+                  </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr><td colspan="5" class="text-center text-muted py-4">No stores found.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- UNVERIFIED LISTINGS -->
-    <div class="col-md-12">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-warning text-dark d-flex justify-content-between">
-          <span><i class="fa fa-exclamation-circle"></i> Unverified Listings</span>
-          <span class="fw-bold">
-            <a href="javascript:void(0)" class="text-dark text-decoration-underline" onclick="toggleSection('pendingList')">
-              <%= pendingListings.length %>
-            </a>
-          </span>
+    <div class="tab-pane fade" id="listingsTab" role="tabpanel">
+      <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">Listings</h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <%- include('../partials/tableHeader', { columns: [
+                { label: 'Product', align: 'start' },
+                { label: 'Store', align: 'start' },
+                { label: 'Category', align: 'start' },
+                { label: 'Verified', align: 'start' },
+                { label: 'Actions', align: 'end' }
+              ] }) %>
+              <tbody>
+                <% const listingList = listings || []; %>
+                <% if (listingList.length) { %>
+                  <% listingList.forEach(l => { %>
+                  <tr>
+                    <td><%= l.itemName %></td>
+                    <td><%= (l.store && l.store.shopName) ? l.store.shopName : '' %></td>
+                    <td><%= l.category %></td>
+                    <td>
+                      <% if (l.verifiedByAdmin) { %><span class="badge bg-success">Verified</span><% } else if (l.rejectedByAdmin) { %><span class="badge bg-danger">Rejected</span><% } else { %><span class="badge bg-warning text-dark">Pending</span><% } %>
+                    </td>
+                    <td class="text-end">
+                      <% if (!l.verifiedByAdmin) { %>
+                        <form action="/admin/listings/<%= l._id %>/approve" method="POST" class="d-inline">
+                          <button type="submit" class="btn btn-sm btn-outline-success">Approve</button>
+                        </form>
+                      <% } %>
+                      <form action="/admin/listings/<%= l._id %>/remove" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr><td colspan="5" class="text-center text-muted py-4">No listings found.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <div class="card-body" id="pendingList" style="display:none;">
-          <h5 class="fw-bold mb-3">Pending Approval</h5>
+    <div class="tab-pane fade" id="ordersTab" role="tabpanel">
+      <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">Orders (Rent / Stitch)</h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <%- include('../partials/tableHeader', { columns: [
+                { label: 'User (Renter)', align: 'start' },
+                { label: 'Product', align: 'start' },
+                { label: 'Type', align: 'start' },
+                { label: 'Status', align: 'start' },
+                { label: 'Amount', align: 'end' },
+                { label: 'Date', align: 'start' }
+              ] }) %>
+              <tbody>
+                <% const allBookings = bookings || []; %>
+                <% if (allBookings.length) { %>
+                  <% allBookings.forEach(b => {
+                    const listing = b.productId || {};
+                    const renter = b.renterId || {};
+                    const type = (listing.businessMode === 'rental' || (listing.businessMode === 'both' && b.startDate)) ? 'Rental' : 'Custom/Stitch';
+                  %>
+                  <tr>
+                    <td><%= renter.username || '—' %><br><small class="text-muted"><%= renter.email || '' %></small></td>
+                    <td><%= listing.itemName || '—' %></td>
+                    <td><span class="badge <%= type === 'Rental' ? 'bg-secondary' : 'bg-info text-dark' %>"><%= type %></span></td>
+                    <td><%- include('../partials/statusBadge', { status: b.orderStatus || b.status || 'pending' }) %></td>
+                    <td class="text-end">₹<%= Number(b.totalPrice || 0).toLocaleString('en-IN') %></td>
+                    <td><%= b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-IN') : '—' %></td>
+                  </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr><td colspan="6" class="text-center text-muted py-4">No orders yet.</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="tab-pane fade" id="pendingTab" role="tabpanel">
+      <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">Pending Approval</h5></div>
+        <div class="card-body">
           <div class="row g-3">
-            <% pendingListings.forEach(listing => { %>
+            <% const pending = pendingListings || []; %>
+            <% if (pending.length) { %>
+              <% pending.forEach(listing => { %>
               <div class="col-md-4">
                 <div class="card shadow-sm">
-                  <img src="<%= listing.image.url %>" class="card-img-top" style="height:200px; object-fit:cover;">
-
+                  <img src="<%= listing.image && listing.image.url ? listing.image.url : 'https://via.placeholder.com/200' %>" class="card-img-top" style="height:180px;object-fit:cover;" alt="">
                   <div class="card-body">
-                    <h5 class="card-title fw-bold"><%= listing.itemName %></h5>
-                    <p><strong>Price:</strong> ₹<%= listing.price %></p>
-                    <p><strong>Owner:</strong> <%= listing.owner.username %></p>
-
-                    <a href="/listing/<%= listing._id %>" class="btn btn-sm btn-primary">View</a>
-
-                    <!-- APPROVE BUTTON -->
+                    <h6 class="card-title"><%= listing.itemName %></h6>
+                    <p class="small text-muted mb-2">Owner: <%= listing.owner && listing.owner.username ? listing.owner.username : '' %></p>
                     <form action="/admin/listings/<%= listing._id %>/approve" method="POST" class="d-inline">
-                      <button class="btn btn-sm btn-success">Approve</button>
+                      <button type="submit" class="btn btn-sm btn-success">Approve</button>
                     </form>
-
-                    <!-- REJECT BUTTON -->
                     <form action="/admin/listings/<%= listing._id %>/reject" method="POST" class="d-inline">
-                      <button class="btn btn-sm btn-danger">Reject</button>
+                      <button type="submit" class="btn btn-sm btn-danger">Reject</button>
                     </form>
-
                   </div>
                 </div>
               </div>
-            <% }) %>
+              <% }) %>
+            <% } else { %>
+              <div class="col-12 text-center text-muted py-4">No pending listings.</div>
+            <% } %>
           </div>
-
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<script>
-function toggleSection(id) {
-  const el = document.getElementById(id);
-  el.style.display = (el.style.display === "none") ? "block" : "none";
-}
-
-// DELETE USER
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-id");
-      if (confirm("Are you sure?")) {
-        const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
-        const data = await res.json();
-        if (data.success) document.getElementById(`user-${id}`).remove();
-      }
-    });
-  });
-});
-</script>

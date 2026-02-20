@@ -1,0 +1,33 @@
+<%- include('./components/header.ejs') %>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-body p-4">
+          <h2 class="card-title mb-4">Become a Tailor</h2>
+          <% if (!store) { %>
+          <p class="text-muted">Create your tailor profile and shop in one step.</p>
+          <form action="/seller/become-tailor" method="POST">
+            <div class="mb-3">
+              <label class="form-label">Shop Name</label>
+              <input type="text" name="shopName" class="form-control" placeholder="<%= currUser.username %>'s Tailor" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tailor Type</label>
+              <select name="tailorType" class="form-select">
+                <option value="Home Tailor">Home Tailor</option>
+                <option value="Boutique">Boutique</option>
+                <option value="Designer Studio">Designer Studio</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Become a Tailor</button>
+          </form>
+          <% } else { %>
+          <p>You already have a tailor shop. <a href="/seller/dashboard">Go to dashboard</a>.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('./components/footer.ejs') %>

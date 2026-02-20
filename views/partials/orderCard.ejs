@@ -1,0 +1,89 @@
+<%
+  const o = order;
+  const listing = (o && o.listing) ? o.listing : (o && o.productId ? o.productId : {});
+  const store = (o && o.store) ? o.store : (listing && listing.store ? listing.store : null);
+  const imgUrl = (listing.image && listing.image.url) ? listing.image.url : 'https://via.placeholder.com/80x80?text=No+Image';
+
+  const orderType = (o && o.orderType) ? String(o.orderType).toLowerCase() : (o.productId && (o.productId.businessMode === 'rental' || (o.productId.businessMode === 'both' && o.startDate)) ? 'rental' : 'custom');
+  const isRental = orderType === 'rental';
+  const isCustom = orderType === 'custom';
+
+  const createdAt = (o && o.createdAt) ? new Date(o.createdAt) : null;
+  const startDate = (o && o.startDate) ? new Date(o.startDate) : null;
+  const endDate = (o && o.endDate) ? new Date(o.endDate) : null;
+  const expectedDeliveryDate = (o && o.expectedDeliveryDate) ? new Date(o.expectedDeliveryDate) : null;
+
+  let showReturnReminder = false;
+  if (isRental && endDate) {
+    const diffDays = (endDate - new Date()) / (1000 * 60 * 60 * 24);
+    showReturnReminder = diffDays > 0 && diffDays <= 2;
+  }
+
+  const statusRaw = (o && (o.status || o.orderStatus)) ? String(o.status || o.orderStatus) : 'pending';
+  const statusLower = statusRaw.toLowerCase().replace(/_/g, '');
+  const canCancel = ['pending', 'confirmed', 'pendingmeasurements'].indexOf(statusLower) !== -1;
+
+  let progressPercent = 25, progressLabel = 'Pending';
+  switch (statusLower) {
+    case 'pending': case 'pendingmeasurements': progressPercent = 25; progressLabel = 'Pending'; break;
+    case 'confirmed': progressPercent = 40; progressLabel = 'Confirmed'; break;
+    case 'inprogress': case 'institching': case 'qualitycheck': progressPercent = 70; progressLabel = 'In Progress'; break;
+    case 'ready': progressPercent = 90; progressLabel = 'Ready'; break;
+    case 'completed': case 'delivered': progressPercent = 100; progressLabel = 'Completed'; break;
+    default: progressLabel = statusRaw;
+  }
+
+  const totalAmount = (o && (o.totalAmount != null ? o.totalAmount : o.totalPrice)) || 0;
+%>
+<div class="card mb-3 shadow-sm">
+  <div class="card-body">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-6 d-flex">
+        <div class="flex-shrink-0 me-3">
+          <img src="<%= imgUrl %>" class="rounded" alt="Product" style="width: 80px; height: 80px; object-fit: cover;">
+        </div>
+        <div class="flex-grow-1">
+          <h6 class="mb-1"><%= listing.itemName || 'Unknown Product' %></h6>
+          <p class="mb-1 text-muted small">
+            <% if (store && store.shopName) { %><i class="bi bi-shop me-1"></i><%= store.shopName %><% } %>
+          </p>
+          <% if (createdAt) { %><small class="text-muted">Ordered: <%= createdAt.toLocaleDateString('en-IN') %></small><% } %>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <% if (isRental) { %><span class="badge bg-secondary me-1">Rental</span><% } else { %><span class="badge bg-info text-dark me-1">Custom Stitching</span><% } %>
+            <%- include('statusBadge', { status: statusRaw }) %>
+          </div>
+          <div class="text-end">
+            <div class="fw-semibold">₹<%= Number(totalAmount).toLocaleString('en-IN') %></div>
+          </div>
+        </div>
+        <% if (isRental && startDate && endDate) { %>
+        <div class="mb-2">
+          <small class="text-muted"><i class="bi bi-calendar-range me-1"></i><%= startDate.toLocaleDateString('en-IN') %> – <%= endDate.toLocaleDateString('en-IN') %></small>
+          <% if (showReturnReminder) { %><span class="badge bg-warning text-dark ms-2">Return due soon</span><% } %>
+        </div>
+        <% } %>
+        <% if (isCustom) { %>
+        <div class="mb-2">
+          <small class="d-block text-muted mb-1">Progress</small>
+          <div class="progress" style="height: 6px;">
+            <div class="progress-bar bg-primary" role="progressbar" style="width: <%= progressPercent %>%;"></div>
+          </div>
+          <small class="text-muted"><%= progressLabel %><% if (expectedDeliveryDate) { %> · ETA: <%= expectedDeliveryDate.toLocaleDateString('en-IN') %><% } %></small>
+        </div>
+        <% } %>
+        <div class="d-flex justify-content-end gap-2 mt-2">
+          <a href="/listing/<%= listing._id %>" class="btn btn-outline-secondary btn-sm">View Details</a>
+          <% if (canCancel) { %>
+          <form action="/orders/<%= o._id %>/cancel" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Cancel</button>
+          </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

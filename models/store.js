@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const User = require("./users");
+const Listing = require("./listing");
 
 const storeSchema = new Schema({
   owner: {
@@ -13,7 +13,7 @@ const storeSchema = new Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true
+    trim: true,
   },
 
   slug: { type: String, unique: true },
@@ -33,6 +33,8 @@ const storeSchema = new Schema({
   address: String,
   phone: String,
 
+  isApproved: { type: Boolean, default: false },
+
   rating: { type: Number, default: 0 },
   totalReviews: { type: Number, default: 0 },
 
@@ -50,37 +52,48 @@ const storeSchema = new Schema({
   promotionPoints: {
     type: Number,
     default: 0,
-  } 
+  },
 
+  tailorType: {
+    type: String,
+    enum: ["Boutique", "Home Tailor", "Designer Studio"],
+    default: "Home Tailor",
+  },
+
+  servicesOffered: [{
+    type: String,
+    enum: ["Rental", "Custom Stitching", "Alteration"],
+  }],
+
+  workingDays: [{ type: String }],
+
+  workingHours: {
+    open: String,
+    close: String,
+  },
+
+  averageStitchingTime: {
+    type: Number,
+    default: 3,
+  },
+
+  productionCapacityPerDay: {
+    type: Number,
+    default: 20,
+  },
+
+  activeOrderCount: {
+    type: Number,
+    default: 0,
+  },
 }, { timestamps: true });
 
-
-// CLEANUP MIDDLEWARE — delete stores whose owner is missing
-storeSchema.post("find", async function (stores) {
-  const Store = this.model;
-  const User = mongoose.model("User");
-
-  for (let store of stores) {
-    try {
-      if (!store.owner) {
-        await Store.findOneAndDelete({ _id: store._id });
-        console.log(`⛔ Deleted Store ${store._id} — owner missing`);
-        continue;
-      }
-
-      const userExists = await User.exists({ _id: store.owner });
-
-      if (!userExists) {
-        await Store.findOneAndDelete({ _id: store._id });
-        console.log(`⛔ Deleted Store ${store._id} — owner not found`);
-      }
-    } catch (err) {
-      console.log("Error deleting invalid store:", err);
-    }
-  }
+// Cascade delete — remove listings when store is deleted
+storeSchema.pre("findOneAndDelete", async function (next) {
+  const store = await this.model.findOne(this.getQuery());
+  if (!store) return next();
+  await Listing.deleteMany({ store: store._id });
+  next();
 });
-
-
-
 
 module.exports = mongoose.model("Store", storeSchema);

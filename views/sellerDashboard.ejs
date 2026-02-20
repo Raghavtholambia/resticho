@@ -1,1 +1,134 @@
-<h1> welcome to dashboard <%= currUser.name %> </h1>
+<%- include('partials/toasts') %>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Seller Dashboard</h3>
+    <% if (store && store.shopName) { %>
+      <span class="text-muted">Store: <strong><%= store.shopName %></strong></span>
+    <% } %>
+  </div>
+
+  <% if (!store) { %>
+    <div class="alert alert-warning">
+      You don't have a tailor shop yet.
+      <a href="/seller/become-tailor" class="alert-link">Become a tailor</a> to start accepting orders.
+    </div>
+  <% } else { %>
+
+    <div class="row mb-4">
+      <%- include('partials/statsCard', { title: 'Total Revenue', value: '₹' + (totalRevenue || 0).toLocaleString('en-IN'), iconClass: 'bi-cash-stack', variant: 'success' }) %>
+      <%- include('partials/statsCard', { title: 'Monthly Revenue', value: '₹' + (monthlyRevenue || 0).toLocaleString('en-IN'), iconClass: 'bi-calendar3', variant: 'primary' }) %>
+      <%- include('partials/statsCard', { title: 'Total Orders', value: totalOrders || 0, iconClass: 'bi-bag-check', variant: 'info' }) %>
+      <%- include('partials/statsCard', { title: 'Active Orders', value: activeOrders || 0, iconClass: 'bi-lightning-charge', variant: 'warning' }) %>
+      <%- include('partials/statsCard', { title: 'Rating', value: (store.rating != null && store.rating.toFixed) ? store.rating.toFixed(1) : (store.rating || 0), iconClass: 'bi-star-fill', variant: 'warning' }) %>
+    </div>
+
+    <ul class="nav nav-pills mb-3" id="orderFilterTabs">
+      <li class="nav-item"><button class="nav-link active" data-type="all" type="button">All</button></li>
+      <li class="nav-item"><button class="nav-link" data-type="rental" type="button">Rental</button></li>
+      <li class="nav-item"><button class="nav-link" data-type="custom" type="button">Custom</button></li>
+    </ul>
+
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header"><h5 class="mb-0">Orders</h5></div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-borderless mb-0 align-middle">
+            <%- include('partials/tableHeader', { columns: [
+              { label: 'Order ID', align: 'start' },
+              { label: 'Customer', align: 'start' },
+              { label: 'Product', align: 'start' },
+              { label: 'Type', align: 'start' },
+              { label: 'Status', align: 'start' },
+              { label: 'Amount', align: 'end' },
+              { label: 'Action', align: 'end' }
+            ] }) %>
+            <tbody>
+              <% if (orders && orders.length) { %>
+                <% orders.forEach(o => {
+                  const listing = o.productId || o.listing || {};
+                  const user = o.renterId || o.user || {};
+                  const t = (listing.businessMode === 'rental' || (listing.businessMode === 'both' && o.startDate)) ? 'rental' : 'custom';
+                %>
+                <tr data-order-type="<%= t %>">
+                  <td><small class="text-muted">#<%= String(o._id).slice(-6).toUpperCase() %></small></td>
+                  <td><%= user.username || 'Unknown' %></td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <img src="<%= (listing.image && listing.image.url) ? listing.image.url : 'https://via.placeholder.com/40' %>" class="rounded me-2" style="width:40px;height:40px;object-fit:cover;" alt="">
+                      <div>
+                        <div class="fw-semibold"><%= listing.itemName || 'Product' %></div>
+                        <small class="text-muted"><%= listing.businessMode || '' %></small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <% if (t === 'rental') { %><span class="badge bg-secondary">Rental</span><% } else { %><span class="badge bg-info text-dark">Custom</span><% } %>
+                  </td>
+                  <td><%- include('partials/statusBadge', { status: o.orderStatus || o.status || 'pending' }) %></td>
+                  <td class="text-end">₹<%= Number(o.totalPrice || o.totalAmount || 0).toLocaleString('en-IN') %></td>
+                  <td class="text-end">
+                    <a href="/seller/orders" class="btn btn-sm btn-outline-primary">Manage</a>
+                  </td>
+                </tr>
+                <% }) %>
+              <% } else { %>
+                <tr><td colspan="7" class="text-center text-muted py-4">No orders yet.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header"><h5 class="mb-0">Low Stock Alerts</h5></div>
+      <div class="card-body">
+        <% const lowStock = lowStockListings || []; %>
+        <% if (lowStock.length) { %>
+          <ul class="list-group list-group-flush">
+            <% lowStock.forEach(l => { 
+              const totalAvailable = Array.isArray(l.sizeInventory) 
+                ? l.sizeInventory.reduce((sum, row) => sum + (row.availableQuantity || 0), 0) 
+                : (l.totalStock || 0);
+            %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><%= l.itemName %></span>
+                <span class="badge bg-warning text-dark"><%= totalAvailable %> left</span>
+              </li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <p class="text-muted mb-0">No products are low in stock.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2 flex-wrap">
+      <a href="/seller/orders" class="btn btn-primary"><i class="bi bi-clipboard-list me-1"></i>Manage Orders</a>
+      <a href="/listing/new" class="btn btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>Add Listing</a>
+      <% if (store.slug) { %><a href="/store/<%= store.slug %>" class="btn btn-outline-secondary"><i class="bi bi-shop me-1"></i>View Shop</a><% } %>
+    </div>
+
+  <% } %>
+</div>
+
+<script>
+(function () {
+  const tabs = document.querySelectorAll('#orderFilterTabs button[data-type]');
+  const rows = document.querySelectorAll('table tbody tr[data-order-type]');
+  tabs.forEach(btn => {
+    btn.addEventListener('click', function () {
+      tabs.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const type = btn.getAttribute('data-type');
+      rows.forEach(row => {
+        const t = row.getAttribute('data-order-type');
+        row.style.display = (type === 'all' || t === type) ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
+
+<%- include('components/footer') %>
