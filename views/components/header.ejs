@@ -80,59 +80,7 @@
             background: #b3884a;
         }
 
-        /* 🛍️ Category Bar */
-        .bg-white.border-bottom {
-            background: var(--cream-bg) !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        }
 
-        /* Use d-flex flex-wrap for horizontal scroll or wrap on small screens */
-        .nav.justify-content-center {
-            flex-wrap: wrap; 
-        }
-
-        .nav.justify-content-center .nav-link {
-            color: var(--brown-dark) !important;
-            font-weight: 600;
-            padding: 10px 15px;
-            transition: all 0.3s ease;
-        }
-
-        .nav.justify-content-center .nav-link:hover {
-            color: var(--gold-accent) !important;
-            transform: translateY(-2px);
-        }
-
-        /* 🧾 Mega Dropdown */
-        .mega-dropdown .dropdown-menu {
-            /* max width only on desktop */
-            width: auto; 
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
-            padding: 20px;
-            background: #fff;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        
-        /* Apply desktop specific width for mega menu on medium+ screens */
-        @media (min-width: 768px) {
-            .mega-dropdown .dropdown-menu {
-                width: 800px;
-            }
-        }
-
-        .mega-menu .row {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        /* Mega menu hover ONLY on desktop */
-        @media (min-width: 992px) {
-            /* Fix: Use the parent class to show the menu on hover */
-            .mega-dropdown:hover > .dropdown-toggle + .dropdown-menu {
-                display: block;
-            }
-        }
 
 
         @keyframes fadeIn {
@@ -488,6 +436,45 @@
                 transform: translateY(0);
             }
         }
+        /* ============================= */
+/* MOBILE NAV */
+/* ============================= */
+
+.mobile-nav {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .mobile-nav {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #fff;
+    border-top: 1px solid #eee;
+    padding: 8px 0;
+    z-index: 1030;
+  }
+
+  .mobile-nav .nav-container {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .mobile-nav a {
+    font-size: 12px;
+    color: #555;
+    text-decoration: none;
+  }
+
+  .mobile-nav a i {
+    display: block;
+    font-size: 18px;
+  }
+
+
+
+}
     </style>
 </head>
     <nav class="navbar navbar-expand-lg sticky-top">
@@ -569,6 +556,11 @@
                             <li>
                                 <a class="dropdown-item" href="/profile">
                                     <i class="fa-solid fa-id-card me-2"></i> Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/orders">
+                                    <i class="fa-solid fa-id-card me-2"></i> My Orders
                                 </a>
                             </li>
 
@@ -828,37 +820,17 @@
     <div id="paymentSuccessPopup">
         <i class="fa-solid fa-circle-check me-1"></i> Payment Successful!
     </div>
-    <div class="bg-white border-bottom">
-        <ul class="nav justify-content-center py-2">
-            <% if (typeof categories !== 'undefined' && categories && categories.length> 0) { %>
-                <% categories.forEach(cat=> { %>
-                    <li class="nav-item dropdown mega-dropdown">
-                        <a class="nav-link dropdown-toggle fw-semibold" href="/category/<%= cat %>" data-bs-toggle="dropdown"
-                            aria-expanded="false" role="button">
-                            <i class="fa-solid fa-tag me-1"></i> 
-                            <%= cat %>
-                        </a>
-                        <div class="dropdown-menu mega-menu p-3">
-                            <div class="row row-cols-1 row-cols-md-4 g-2"> 
-                                <% if (typeof categoryItems !== 'undefined' && categoryItems && categoryItems[cat]) { %>
-                                    <% categoryItems[cat].forEach(item=> { %>
-                                        <div class="col">
-                                            <a class="dropdown-item" href="/listing/<%= item._id %>">
-                                                <i class="fa-solid fa-chevron-right me-1 small"></i>
-                                                <%= item.itemName %>
-                                            </a>
-                                        </div>
-                                    <% }) %>
-                                        <% } else { %>
-                                            <div class="col-12 text-center text-muted small">No items in this category.</div>
-                                            <% } %>
-                            </div>
-                        </div>
-                    </li>
-                <% }) %>
-                    <% } %>
-        </ul>
-    </div>
+    <!-- MOBILE NAV -->
+<div class="mobile-nav">
+  <div class="nav-container">
+    <a href="/"><i class="fa fa-home"></i>Home</a>
+    <a href="/cart/view"><i class="fa fa-shopping-cart"></i>Cart</a>
+    <a href="/store"><i class="fa fa-store"></i>Shops</a>
+    <a href="/profile"><i class="fa fa-user"></i>Profile</a>
+  </div>
+</div>
+
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

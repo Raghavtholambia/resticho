@@ -1,193 +1,293 @@
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Premium Listings</title>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Listings</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <style>
-   
+<style>
 
-      .listing-col {
-        padding: 10px;
-      }
+/* ============================= */
+/* GLOBAL */
+/* ============================= */
 
-      .listing-card {
-        border-radius: 18px;
-        overflow: hidden;
-        transition: all 0.25s ease;
-        background: #fff;
-        cursor: pointer;
-      }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f8f9fa;
+  overflow-x: hidden;
+}
 
-      .listing-card:hover {
-        transform: scale(1.03);
-      }
+/* ============================= */
+/* PRODUCT CARD */
+/* ============================= */
 
-      .listing-img {
-        height: 180px;
-        position: relative;
-        border-radius: 18px;
-        overflow: hidden;
-      }
+.listing-card {
+  border-radius: 18px;
+  overflow: hidden;
+  transition: 0.3s ease;
+  background: #fff;
+  height: 100%;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+}
 
-      .listing-img img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: 0.4s ease;
-        filter: brightness(100%);
-      }
+.listing-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+}
 
-      .listing-card:hover img {
-        transform: scale(1.08);
-      }
+.listing-img {
+  aspect-ratio: 1/1;
+  position: relative;
+  overflow: hidden;
+}
 
-      /* ADMIN BANNER */
-      .not-verified-banner {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.65);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #fff;
-        padding: 10px;
-      }
+.listing-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: 0.5s;
+}
 
-      .guest-fav {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        background: #ffffff;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        box-shadow: 0px 2px 8px rgba(0,0,0,0.15);
-      }
+.listing-card:hover img {
+  transform: scale(1.08);
+}
 
-      .wish-icon {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #ffffff;
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        box-shadow: 0px 2px 8px rgba(0,0,0,0.20);
-      }
+.badge-mode {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: #000;
+  color: #fff;
+}
 
-      .card-body {
-        padding: 8px 2px 0px 2px;
-      }
+.card-body {
+  padding: 12px;
+}
 
-      .place-title {
-        font-size: 0.92rem;
-        font-weight: 600;
-        margin-bottom: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: #212529;
-      }
+.place-title {
+  font-size: 14px;
+  font-weight: 600;
+}
 
-      .price-text {
-        font-size: 0.85rem;
-        color: #444;
-      }
+.price-text {
+  font-size: 13px;
+  color: #666;
+}
 
-      .rating-text {
-        font-size: 0.82rem;
-        color: #222;
-        font-weight: 500;
-      }
-    </style>
-  </head>
+.rating-text {
+  font-size: 12px;
+  color: #888;
+}
 
-  <body>
-    <div class="container py-4">
+/* ============================= */
+/* FILTER PANEL DESKTOP */
+/* ============================= */
 
-      <div class="row">
-        <% listings.forEach(listing => { %>
-          <div class="col-6 col-md-4 col-lg-2 listing-col">
+.filter-panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  position: sticky;
+  top: 110px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+}
 
-            <% if(listing.verifiedByAdmin) { %>
-            <a href="/listing/<%= listing.id %>" class="text-decoration-none text-dark">
-                          <% } %>
+/* ============================= */
+/* MOBILE FILTER BUTTON */
+/* ============================= */
 
-              <div class="listing-card">
+.mobile-filter-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: #000;
+  color: #fff;
+  border-radius: 50px;
+  padding: 10px 18px;
+  font-size: 14px;
+  z-index: 1050;
+  display: none;
+}
 
-                <!-- IMAGE SECTION -->
-                <div class="listing-img">
+@media (max-width: 991px) {
+  .mobile-filter-btn {
+    display: block;
+  }
+}
 
-                  <img src="<%= listing.image.url %>" alt="Listing Image" />
+/* ============================= */
+/* MOBILE FILTER MODAL */
+/* ============================= */
 
-                  <!-- NOT VERIFIED BANNER -->
-                  <% if (!listing.verifiedByAdmin) { %>
-                    <div class="not-verified-banner">
-                      Not Available Right Now
-                    </div>
-                  <% } %>
+.mobile-filter-overlay {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  height: 85%;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  transition: 0.4s ease;
+  z-index: 1060;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
+}
 
-                  <!-- Guest favourite -->
-                  <div class="guest-fav">Guest favourite</div>
+.mobile-filter-overlay.active {
+  bottom: 0;
+}
 
-                  <!-- Wishlist -->
-                  <div class="wish-icon">
-                    <i class="fa-regular fa-heart"></i>
-                  </div>
-                </div>
+.filter-close {
+  text-align: right;
+  font-size: 20px;
+  cursor: pointer;
+}
 
-                <!-- DETAILS -->
-                <div class="card-body">
-                  <div class="place-title"><%= listing.itemName %></div>
 
-                  <div class="price-text">
-                    <% var p = listing.pricing || {}; %>
-                    <% if (listing.businessMode === 'rental' || listing.businessMode === 'both') { %>
-                      ₹<%= (p.rentalPricePerDay || 0).toLocaleString('en-IN') %>/day
-                    <% } %>
-                    <% if (listing.businessMode === 'both') { %> · <% } %>
-                    <% if (listing.businessMode === 'custom' || listing.businessMode === 'both') { %>
-                      ₹<%= (p.stitchingBasePrice || 0).toLocaleString('en-IN') %> stitch
-                    <% } %>
-                  </div>
 
-                  <div class="rating-text">
-                    <% if (listing.averageRating && listing.averageRating > 0) { %>
-                      ★ <%= listing.averageRating.toFixed(2) %>
-                    <% } else { %>
-                      ★ New
-                    <% } %>
-                  </div>
-                </div>
+</style>
+</head>
 
-              </div>
-            </a>
+<body>
+    <div class="bg-white border-bottom sticky-category">
+  <div class="container-fluid">
 
+    <ul class="nav category-scroll py-2">
+
+      <% 
+        const categoryList = [
+          "Men Ethnic",
+          "Women Ethnic",
+          "Western Wear",
+          "Wedding Wear",
+          "Party Wear",
+          "Casual Wear",
+          "Designer",
+          "Kids Wear",
+          "Accessories"
+        ];
+      %>
+
+      <% categoryList.forEach(cat => { %>
+        <li class="nav-item flex-shrink-0">
+          <a 
+            class="nav-link fw-semibold category-link <%= query?.category === cat ? 'active-category' : '' %>"
+            href="/?category=<%= encodeURIComponent(cat) %>">
+            <i class="fa-solid fa-tag me-1 small"></i>
+            <%= cat %>
+          </a>
+        </li>
+      <% }) %>
+
+    </ul>
+
+  </div>
+</div>
+
+<div class="container-fluid mt-5 pt-4">
+
+<!-- MODE TOGGLE -->
+<div class="d-flex justify-content-center mb-3">
+  <div class="btn-group">
+    <a href="/?mode=rental" class="btn btn-outline-dark <%= query.mode==='rental'?'active':'' %>">Rental</a>
+    <a href="/?mode=custom" class="btn btn-outline-dark <%= query.mode==='custom'?'active':'' %>">Stitching</a>
+    <a href="/" class="btn btn-outline-dark <%= !query.mode?'active':'' %>">All</a>
+  </div>
+</div>
+
+<div class="row">
+
+<!-- DESKTOP FILTER -->
+<div class="col-lg-3 d-none d-lg-block">
+  <div class="filter-panel">
+    <%- include("partials/filterPanel") %>
+  </div>
+</div>
+
+<!-- PRODUCT GRID -->
+<div class="col-lg-9">
+  <div class="row g-4">
+
+    <% listings.forEach(listing => { %>
+    <div class="col-6 col-md-6 col-lg-4">
+      <a href="/listing/<%= listing._id %>" class="text-decoration-none text-dark">
+        <div class="listing-card">
+
+          <div class="listing-img">
+            <img src="<%= listing.image?.url %>" alt="">
+            <div class="badge-mode">
+              <%= listing.businessMode === "rental" ? "Rental" : "Stitching" %>
+            </div>
           </div>
-        <% }) %>
-      </div>
 
+          <div class="card-body">
+            <div class="place-title"><%= listing.itemName %></div>
+            <div class="price-text">
+              ₹<%= listing.pricing?.rentalPricePerDay || listing.pricing?.stitchingBasePrice %>
+            </div>
+            <div class="rating-text">
+              ★ <%= listing.averageRating || "New" %>
+            </div>
+          </div>
+
+        </div>
+      </a>
     </div>
+    <% }) %>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+  </div>
+
+  <!-- PAGINATION -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      <% for(let i=1;i<=totalPages;i++){ %>
+      <li class="page-item <%= currentPage===i?'active':'' %>">
+        <a class="page-link" href="/?page=<%=i%>"><%=i%></a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+
+</div>
+</div>
+</div>
+
+<!-- MOBILE FILTER BUTTON -->
+<button class="mobile-filter-btn" onclick="openFilter()">
+  <i class="fa fa-sliders"></i> Filters
+</button>
+
+<!-- MOBILE FILTER MODAL -->
+<div class="mobile-filter-overlay" id="mobileFilter">
+  <div class="filter-close" onclick="closeFilter()">
+    <i class="fa fa-times"></i>
+  </div>
+  <%- include("partials/filterPanel") %>
+</div>
+
+
+<script>
+function openFilter(){
+  document.getElementById("mobileFilter").classList.add("active");
+}
+
+function closeFilter(){
+  document.getElementById("mobileFilter").classList.remove("active");
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
 </html>
-

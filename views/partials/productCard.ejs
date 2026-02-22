@@ -1,0 +1,117 @@
+<style>
+  /* ============================= */
+/* PRODUCT CARD */
+/* ============================= */
+
+.card {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  background: #fff;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.card-img-top {
+  height: 260px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.card-body {
+  padding: 14px;
+}
+
+.card-body h6 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #222;
+}
+
+.card-body small {
+  font-size: 13px;
+  color: #777;
+}
+
+.card-body .fw-bold {
+  font-size: 16px;
+  color: #000;
+}
+
+/* Mode badge */
+.card .badge {
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+/* Trending badge */
+.trending-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff3b30;
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 12px;
+}
+
+/* Stock indicator */
+.stock-low {
+  font-size: 12px;
+  color: #d9534f;
+}
+
+.stock-available {
+  font-size: 12px;
+  color: #28a745;
+}
+
+/* Quick view (hidden until hover) */
+.quick-view {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: 0.3s ease;
+}
+
+.card:hover .quick-view {
+  opacity: 1;
+}
+</style>
+<div class="col-6 col-md-6 col-lg-3">
+  <div class="card h-100 shadow-sm position-relative">
+
+    <% if(listing.businessMode === "rental"){ %>
+      <span class="badge bg-primary position-absolute top-0 start-0 m-2">Rental</span>
+    <% } %>
+
+    <% if(listing.businessMode === "custom"){ %>
+      <span class="badge bg-success position-absolute top-0 start-0 m-2">Stitching</span>
+    <% } %>
+
+    <img src="<%= listing.image?.url %>" class="card-img-top">
+
+    <div class="card-body">
+      <h6><%= listing.itemName %></h6>
+
+      <small>★ <%= listing.averageRating || "New" %></small>
+
+      <div class="fw-bold mt-2">
+        ₹<%= listing.pricing?.rentalPricePerDay || listing.pricing?.stitchingBasePrice %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -68,44 +68,19 @@ module.exports.createListing = async (req, res) => {
     }
 
     const businessMode = listing.businessMode || "custom";
-
     if (businessMode === "custom" || businessMode === "both") {
         listing.fabricOptions = sanitizeArray(listing.fabricOptions);
         listing.sizeOptions = sanitizeArray(listing.sizeOptions);
     }
 
-    /* ---------------------------------------------------
-       ✅ Step 1: Convert object sizeInventory → array
-       (if form sends: { S: 10, M: 5, L: 0 })
-    ---------------------------------------------------- */
-    if (req.body.listing.sizeInventory && !Array.isArray(req.body.listing.sizeInventory)) {
-        const rawSizes = req.body.listing.sizeInventory;
-
-        req.body.listing.sizeInventory = Object.entries(rawSizes)
-            .filter(([size, qty]) => parseInt(qty) > 0)
-            .map(([size, qty]) => ({
-                size,
-                totalQuantity: parseInt(qty),
-                availableQuantity: parseInt(qty),
-            }));
-    }
-
-    /* ---------------------------------------------------
-       ✅ Step 2: Clean and normalize inventory
-    ---------------------------------------------------- */
-    const rawSizeInventory = Array.isArray(req.body.listing.sizeInventory)
-        ? req.body.listing.sizeInventory
-        : [];
-
+    // Build size-based inventory from form (listing.sizeInventory expected)
+    const rawSizeInventory = Array.isArray(listing.sizeInventory) ? listing.sizeInventory : [];
     const sizeInventory = rawSizeInventory
         .filter((row) => row && row.size)
         .map((row) => ({
             size: row.size,
-            totalQuantity: parseInt(row.totalQuantity),
-            availableQuantity:
-                row.availableQuantity != null
-                    ? parseInt(row.availableQuantity)
-                    : parseInt(row.totalQuantity),
+            totalQuantity: row.totalQuantity,
+            availableQuantity: row.availableQuantity != null ? row.availableQuantity : row.totalQuantity,
         }));
 
     const newListing = new Listing({
@@ -118,10 +93,7 @@ module.exports.createListing = async (req, res) => {
         sizeInventory,
         stitchingDurationDays: Math.max(1, parseInt(listing.stitchingDurationDays, 10) || 3),
         occasions: sanitizeArray(listing.occasions),
-        fabricPricing:
-            listing.fabricPricing && typeof listing.fabricPricing === "object"
-                ? listing.fabricPricing
-                : {},
+        fabricPricing: listing.fabricPricing && typeof listing.fabricPricing === "object" ? listing.fabricPricing : {},
         fabricOptions: listing.fabricOptions || [],
         sizeOptions: listing.sizeOptions || [],
         owner: req.user._id,
@@ -130,14 +102,10 @@ module.exports.createListing = async (req, res) => {
     });
 
     if (req.file) {
-        newListing.image = {
-            url: req.file.path,
-            filename: req.file.filename,
-        };
+        newListing.image = { url: req.file.path, filename: req.file.filename };
     }
 
     await newListing.save();
-
     req.flash("success", "Listing created. Waiting for admin approval.");
     res.redirect("/");
 };
@@ -145,11 +113,101 @@ module.exports.createListing = async (req, res) => {
 // =========================================
 // ⭐ GET ALL (ONLY APPROVED LISTINGS SHOWN)
 // =========================================
+// =========================================
+// ⭐ GET ALL LISTINGS (ADVANCED FILTER + SORT)
+// =========================================
 module.exports.getAllListings = async (req, res) => {
-    const allListing = await Listing.find({ isActive: { $ne: false }, verifiedByAdmin: true })
-        .populate("owner")
-        .populate("store");
-    res.render("index", { listings: allListing });
+    try {
+        const {
+            search,
+            sort,
+            category,
+            mode,
+            minPrice,
+            maxPrice,
+            ratingAbove,
+            city,
+            page = 1
+        } = req.query;
+
+        const limit = 12;
+        const skip = (page - 1) * limit;
+
+        let query = {
+            isActive: { $ne: false },
+            verifiedByAdmin: true
+        };
+
+        // 🔍 TEXT SEARCH
+        if (search) {
+            query.$text = { $search: search };
+        }
+
+        // 🎯 CATEGORY
+        if (category) {
+            query.category = category;
+        }
+
+        // 🎯 MODE FILTER
+        if (mode && ["rental", "custom"].includes(mode)) {
+            query.businessMode = { $in: [mode, "both"] };
+        }
+
+        // 💰 PRICE FILTER
+        if (minPrice || maxPrice) {
+            query["pricing.rentalPricePerDay"] = {};
+            if (minPrice) query["pricing.rentalPricePerDay"].$gte = Number(minPrice);
+            if (maxPrice) query["pricing.rentalPricePerDay"].$lte = Number(maxPrice);
+        }
+
+        // ⭐ RATING
+        if (ratingAbove) {
+            query.averageRating = { $gte: Number(ratingAbove) };
+        }
+
+        // 🏙️ CITY (if store has city field)
+        if (city) {
+            query.city = city;
+        }
+
+        // 📊 SORT LOGIC
+        let sortOption = { createdAt: -1 };
+
+        switch (sort) {
+            case "priceLowToHigh":
+                sortOption = { "pricing.rentalPricePerDay": 1 };
+                break;
+            case "priceHighToLow":
+                sortOption = { "pricing.rentalPricePerDay": -1 };
+                break;
+            case "highestRated":
+                sortOption = { averageRating: -1 };
+                break;
+            case "newest":
+                sortOption = { createdAt: -1 };
+                break;
+        }
+
+        const listings = await Listing.find(query)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit)
+            .select("itemName image pricing averageRating businessMode totalStock category")
+            .lean();
+
+        const total = await Listing.countDocuments(query);
+
+        res.render("index", {
+            listings,
+            currentPage: Number(page),
+            totalPages: Math.ceil(total / limit),
+            query: req.query
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.redirect("/");
+    }
 };
 
 // =========================================

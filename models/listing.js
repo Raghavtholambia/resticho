@@ -127,7 +127,8 @@ const listingSchema = new Schema({
     type: Boolean,
     default: true,
   },
-});
+  
+}, { timestamps: true });
 
 // Indexes for fast size-based queries / updates
 listingSchema.index({ "sizeInventory.size": 1 });
@@ -161,7 +162,18 @@ listingSchema.pre("save", function (next) {
         availableQuantity: available,
       };
     });
+// TEXT SEARCH INDEX
+listingSchema.index({
+  itemName: "text",
+  description: "text",
+  category: "text"
+});
 
+// PERFORMANCE INDEXES
+listingSchema.index({ businessMode: 1, category: 1, averageRating: -1 });
+listingSchema.index({ "pricing.rentalPricePerDay": 1 });
+listingSchema.index({ averageRating: -1 });
+listingSchema.index({ createdAt: -1 });
   // Auto-fill availableQuantity = totalQuantity when only total is provided
   this.sizeInventory = this.sizeInventory.map((row) => {
     if (row.totalQuantity > 0 && (row.availableQuantity == null || row.availableQuantity === 0)) {

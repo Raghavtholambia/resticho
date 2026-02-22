@@ -67,28 +67,10 @@
       <label class="form-label">Security Deposit (₹)</label>
       <input type="number" name="listing[pricing][securityDeposit]" class="form-control" min="0" placeholder="0">
     </div>
-<div class="mb-3">
-  <label class="form-label">Size Inventory</label>
-
-  <div class="row">
-    <% ["XS","S","M","L","XL","XXL"].forEach(function(size){ %>
-      <div class="col-md-4 mb-2">
-        <label><%= size %> Quantity</label>
-        <input 
-          type="number"
-          name="listing[sizeInventory][<%= size %>]"
-          class="form-control"
-          min="0"
-          value="0"
-        >
-      </div>
-    <% }); %>
-  </div>
-
-  <small class="text-muted">
-    Enter stock per size. Leave 0 if not available.
-  </small>
-</div>
+    <div class="mb-2">
+      <label class="form-label">Total Quantity (stock)</label>
+      <input type="number" name="listing[stock][totalQuantity]" class="form-control" min="1" value="1">
+    </div>
   </div>
 
   <!-- Custom section -->
