@@ -13,80 +13,121 @@
 <style>
 
 /* ============================= */
-/* GLOBAL */
+/* GLOBAL & AIRBNB STYLE */
 /* ============================= */
-
 body {
   font-family: 'Poppins', sans-serif;
-  background: #f8f9fa;
-  overflow-x: hidden;
+  color: #222;
+  background-color: #fff;
+}
+
+/* Custom Grid for 5 items on Desktop */
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 per row mobile */
+  gap: 16px;
+  padding: 8px;
+}
+
+@media (min-width: 768px) {
+  .listing-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 per row tablet */
+  }
+}
+
+@media (min-width: 1200px) {
+  .listing-grid {
+    grid-template-columns: repeat(5, 1fr); /* 5 per row desktop */
+  }
 }
 
 /* ============================= */
-/* PRODUCT CARD */
+/* AIRBNB PRODUCT CARD */
 /* ============================= */
-
 .listing-card {
-  border-radius: 18px;
+  border: none; /* Airbnb doesn't use borders on cards */
   overflow: hidden;
-  transition: 0.3s ease;
-  background: #fff;
-  height: 100%;
-  border: 1px solid #eee;
+  background: transparent;
   display: flex;
   flex-direction: column;
-}
-
-.listing-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+  text-decoration: none !important;
+  color: inherit !important;
 }
 
 .listing-img {
-  aspect-ratio: 1/1;
+  aspect-ratio: 1/1; /* Square images */
   position: relative;
   overflow: hidden;
+  border-radius: 12px; /* Soft rounded corners */
+  background-color: #f7f7f7;
 }
 
 .listing-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: 0.5s;
+  transition: opacity 0.2s ease;
 }
 
-.listing-card:hover img {
-  transform: scale(1.08);
+/* Heart Icon */
+.wishlist-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 18px;
+  z-index: 2;
+  -webkit-text-stroke: 2px white;
 }
 
-.badge-mode {
+/* Guest Favourite Badge */
+.guest-fav-badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  font-size: 11px;
-  padding: 5px 10px;
-  border-radius: 20px;
-  background: #000;
-  color: #fff;
+  background: white;
+  color: #222;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Card Typography */
 .card-body {
-  padding: 12px;
+  padding: 8px 0 0 0; /* Align text with image edge */
 }
 
 .place-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sub-info {
+  font-size: 14px;
+  color: #717171; /* Subtle grey for subtitle */
+  margin-bottom: 4px;
 }
 
 .price-text {
-  font-size: 13px;
-  color: #666;
+  font-size: 15px;
+  color: #222;
+  font-weight: 400;
 }
 
-.rating-text {
-  font-size: 12px;
-  color: #888;
+.price-text b {
+  font-weight: 600;
+}
+
+/* Star rating on the right */
+.rating-inline {
+  font-weight: 400;
+  font-size: 14px;
 }
 
 /* ============================= */
@@ -155,47 +196,267 @@ body {
 }
 
 
+  /* 1. The Sticky Container */
+  .sticky-category {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
 
+  /* 2. The Scrollable Wrapper */
+  .category-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    gap: 8px; /* Spacing between items */
+  }
+
+  /* Hide scrollbar for Chrome/Safari/Edge */
+  .category-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 3. The Category Pill Styling */
+  .category-link {
+    color: #555 !important;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 8px 16px !important;
+    border-radius: 50px;
+    border: 1px solid #e0e0e0;
+    background-color: #fff;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap; /* Keeps everything in one line */
+  }
+
+  .category-link:hover {
+    background-color: #f8f9fa;
+    border-color: #333;
+    color: #000 !important;
+  }
+
+  /* 4. The Active/Selected State */
+  .active-category {
+    background-color: #333 !important;
+    color: #fff !important;
+    border-color: #333 !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Icon adjustment */
+  .category-link i {
+    opacity: 0.7;
+  }
+  .active-category i {
+    opacity: 1;
+  }
+
+  /* Responsive tweak for mobile */
+  @media (max-width: 768px) {
+    .category-link {
+      padding: 6px 14px !important;
+      font-size: 0.8rem;
+    }
+  }
+  .banner-slider {
+    position: relative;
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+}
+
+.slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+}
+
+.slide.active {
+    opacity: 1;
+    z-index: 1;
+}
+
+.content-left {
+    flex: 1;
+    padding: 0 8%;
+}
+
+.content-left h1 {
+    font-size: 3rem;
+    color: #333;
+    line-height: 1.2;
+}
+
+.content-left span {
+    color: #5a7d6a; /* Theme color */
+}
+
+.image-right {
+    flex: 1;
+    height: 100%;
+}
+
+.image-right img {
+    
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn {
+    padding: 12px 30px;
+    background: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 20px;
+}
+
+/* Navigation Buttons */
+.prev, .next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.7);
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 50%;
+}
+
+.next { right: 20px; }
+.prev { left: 20px; }
+@media (max-width: 768px) {
+    .banner-slider {
+        height: 20vh; /* As per your requirement */
+        min-height: 150px; /* Safety fallback so text doesn't overflow */
+    }
+
+    .slide {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .content-left {
+        padding: 10px;
+        width: 100%;
+        z-index: 2;
+    }
+
+    .content-left h1 {
+        font-size: 1.2rem; /* Smaller text for small height */
+        margin-bottom: 5px;
+    }
+
+    .content-left p {
+        font-size: 0.8rem;
+        margin: 5px 0;
+        display: block; /* Keep it concise */
+    }
+
+    /* Hide the large image on the right to save space, 
+       or use it as a faint background */
+    .image-right {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3; /* Makes the image a subtle background watermark */
+        z-index: 1;
+    }
+
+    .btn {
+        padding: 6px 15px;
+        font-size: 0.7rem;
+        margin-top: 5px;
+    }
+
+    .btn-group {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    /* Shrink arrows for mobile */
+    .prev, .next {
+        padding: 8px;
+        font-size: 12px;
+        background: rgba(255,255,255,0.5);
+    }
+}
 </style>
+
+
 </head>
-
-<body>
-    <div class="bg-white border-bottom sticky-category">
-  <div class="container-fluid">
-
-    <ul class="nav category-scroll py-2">
-
-      <% 
-        const categoryList = [
-          "Men Ethnic",
-          "Women Ethnic",
-          "Western Wear",
-          "Wedding Wear",
-          "Party Wear",
-          "Casual Wear",
-          "Designer",
-          "Kids Wear",
-          "Accessories"
-        ];
-      %>
-
-      <% categoryList.forEach(cat => { %>
-        <li class="nav-item flex-shrink-0">
-          <a 
-            class="nav-link fw-semibold category-link <%= query?.category === cat ? 'active-category' : '' %>"
-            href="/?category=<%= encodeURIComponent(cat) %>">
-            <i class="fa-solid fa-tag me-1 small"></i>
-            <%= cat %>
-          </a>
-        </li>
-      <% }) %>
-
-    </ul>
-
-  </div>
+<div class="bg-white border-bottom sticky-category">
+<form class="d-flex search-wrap my-2 my-lg-0 me-lg-3 w-100 w-lg-auto" action="/">
+    <input 
+        class="form-control search-input me-2 flex-grow-1" 
+        type="search" 
+        name="search"
+        placeholder="Search items"
+        value="<%= query?.search || '' %>"
+    >
+    <button class="btn btn-sm text-dark" type="submit">
+        <i class="fa-solid fa-search"></i>
+    </button>
+</form>
 </div>
 
-<div class="container-fluid mt-5 pt-4">
+<!-- bannners -->
+ <div class="banner-slider">
+    <div class="slide active" style="background-color: #d1e0d7;">
+        <div class="content-left">
+            <h1>Stitch Your Style / <br><span>Rent Your Look</span></h1>
+            <p>Bespoke Creations & Designer Rentals</p>
+            <button class="btn">Explore Now</button>
+        </div>
+        <div class="image-right">
+            <img src="https://res.cloudinary.com/dcudosyh4/image/upload/v1771766651/d78b1d6b-039e-43bc-82c3-615895ac3bb8_kraihi.png" alt="Designer Dresses">
+        </div>
+    </div>
+   
+      <div class="slide" style="background-color: #e2d1f0;">
+      <div class="content-left">
+        <h1>Your Vision, Our Craft.</h1>
+        <p>Custom Tailoring for Every Occasion</p>
+        <div class="btn-group">
+          <button class="btn">Book Appointment</button>
+          <button class="btn secondary">View Fabrics</button>
+        </div>
+      </div>
+      <div class="image-right">
+        <img src="https://res.cloudinary.com/dcudosyh4/image/upload/v1771767325/f7453d5e-a481-407b-8a00-24ea105a1166_lybsuo.png" alt="Tailoring Process">
+      </div>
+    </div>
+    
+    <div class="slide" style="background-color: #f4e8e1;">
+        <div class="content-left">
+            <h1>Rent Designer Looks</h1>
+            <p>Affordable Glamour for Your Next Event</p>
+            <button class="btn">Browse Collection</button>
+        </div>
+        <div class="image-right">
+            <img src="https://res.cloudinary.com/dcudosyh4/image/upload/v1771766065/4f9da43f-cf40-4f7f-b059-3fe3739ffec0_dcxm5m.png" alt="Rental Gowns">
+        </div>
+    </div>
+
+    <button class="prev" onclick="changeSlide(-1)">&#10094;</button>
+    <button class="next" onclick="changeSlide(1)">&#10095;</button>
+</div>
+<div class="container-fluid mt-1">
 
 <!-- MODE TOGGLE -->
 <div class="d-flex justify-content-center mb-3">
@@ -217,47 +478,53 @@ body {
 
 <!-- PRODUCT GRID -->
 <div class="col-lg-9">
-  <div class="row g-4">
+  <div class="listing-grid">
 
     <% listings.forEach(listing => { %>
-    <div class="col-6 col-md-6 col-lg-4">
-      <a href="/listing/<%= listing._id %>" class="text-decoration-none text-dark">
-        <div class="listing-card">
-
-          <div class="listing-img">
-            <img src="<%= listing.image?.url %>" alt="">
-            <div class="badge-mode">
-              <%= listing.businessMode === "rental" ? "Rental" : "Stitching" %>
-            </div>
-          </div>
-
-          <div class="card-body">
-            <div class="place-title"><%= listing.itemName %></div>
-            <div class="price-text">
-              ₹<%= listing.pricing?.rentalPricePerDay || listing.pricing?.stitchingBasePrice %>
-            </div>
-            <div class="rating-text">
-              ★ <%= listing.averageRating || "New" %>
-            </div>
-          </div>
-
+      <a href="/listing/<%= listing._id %>" class="listing-card">
+        
+        <div class="listing-img">
+          <% if(listing.averageRating >= 4.8) { %>
+            <div class="guest-fav-badge">Guest favourite</div>
+          <% } %>
+          
+          <i class="fa-regular fa-heart wishlist-icon"></i>
+          
+          <img src="<%= listing.image?.url %>" alt="<%= listing.itemName %>">
         </div>
+
+        <div class="card-body">
+          <div class="place-title">
+            <span><%= listing.itemName %></span>
+            <span class="rating-inline">
+              <i class="fa-solid fa-star" style="font-size: 10px;"></i> 
+              <%= listing.averageRating || "New" %>
+            </span>
+          </div>
+          
+          <div class="sub-info">
+            <%= listing.businessMode === "rental" ? "Rental Service" : "Professional Stitching" %>
+          </div>
+          
+<div class="price-text">
+  <% if (listing.pricing && (listing.pricing.rentalPricePerDay || listing.pricing.stitchingBasePrice)) { %>
+    <b>₹<%= (listing.pricing.rentalPricePerDay || listing.pricing.stitchingBasePrice).toLocaleString('en-IN') %></b>
+  <% } else { %>
+    <b>Price on request</b>
+  <% } %>
+  <%= listing.businessMode === "rental" ? "per day" : "base price" %>
+</div>
+        </div>
+
       </a>
-    </div>
     <% }) %>
 
   </div>
 
-  <!-- PAGINATION -->
-  <nav class="mt-4">
-    <ul class="pagination justify-content-center">
-      <% for(let i=1;i<=totalPages;i++){ %>
-      <li class="page-item <%= currentPage===i?'active':'' %>">
-        <a class="page-link" href="/?page=<%=i%>"><%=i%></a>
-      </li>
-      <% } %>
-    </ul>
+  <nav class="mt-5">
+
   </nav>
+</div>
 
 </div>
 </div>
@@ -290,4 +557,24 @@ function closeFilter(){
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
+<script>
+  let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+
+function showSlide(index) {
+    slides.forEach(slide => slide.classList.remove('active'));
+    
+    currentSlide = (index + slides.length) % slides.length;
+    slides[currentSlide].classList.add('active');
+}
+
+function changeSlide(direction) {
+    showSlide(currentSlide + direction);
+}
+
+// Auto-play
+setInterval(() => {
+    changeSlide(1);
+}, 5000);
+</script>
 </html>

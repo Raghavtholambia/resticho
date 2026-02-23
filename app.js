@@ -163,7 +163,10 @@ app.use((req, res, next) => {
   next();
 });
 
-
+app.use((req, res, next) => {
+    res.locals.query = req.query;
+    next();
+});
 // 🧩 Load categories for navbar
 app.use(async (req, res, next) => {
   try {
