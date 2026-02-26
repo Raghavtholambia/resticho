@@ -31,10 +31,16 @@ const listingSchema = new Schema({
 
   description: String,
 
-  image: {
+images: [
+  {
     url: String,
     filename: String,
-  },
+    label: {
+      type: String,
+      enum: ["front", "back", "side", "full"],
+    },
+  }
+],
 
   pricing: {
     rentalPricePerDay: { type: Number, default: 0 },

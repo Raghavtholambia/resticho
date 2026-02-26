@@ -25,7 +25,12 @@ router.get("/listing/new", isLoggedIn, listingController.renderNewForm);
 router.post(
   "/listing",
   isLoggedIn,
-  upload.single("listing[image]"),
+  upload.fields([
+  { name: "frontImage", maxCount: 1 },
+  { name: "backImage", maxCount: 1 },
+  { name: "sideImage", maxCount: 1 },
+  { name: "fullImage", maxCount: 1 },
+]),
   normalizeListingForm,
   validateListing,
   wrapAsync(listingController.createListing)
@@ -46,7 +51,12 @@ router.get(
 router.put(
   "/listing/:id",
   isLoggedIn,
-  upload.single("listing[image]"),
+  upload.fields([
+  { name: "frontImage", maxCount: 1 },
+  { name: "backImage", maxCount: 1 },
+  { name: "sideImage", maxCount: 1 },
+  { name: "fullImage", maxCount: 1 },
+]),
   normalizeListingForm,
   validateListing,
   listingOwner,

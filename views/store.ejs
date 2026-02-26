@@ -418,7 +418,7 @@
             <div class="listing-card fade-in-on-scroll">
 
               <div class="listing-img">
-                <img src="<%= listing.image.url %>">
+                <img src="<%= listing.images?.[0]?.url || '/images/placeholder.png' %>">
                 <span class="category-badge">
                   <%= listing.category %>
                 </span>

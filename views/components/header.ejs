@@ -1,7 +1,6 @@
-
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <style>
         /* 🟤 Base Theme Colors */
@@ -19,6 +18,7 @@
             background: linear-gradient(90deg, var(--brown-medium), var(--brown-dark));
             padding: 0.8rem 1.5rem;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+            height: 6vh;
         }
 
         .navbar-brand {
@@ -62,7 +62,9 @@
             margin: auto;
             padding-left: 25px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            max-width:35vh
+            max-width: 35vh;
+            margin-top: 21px;
+
         }
 
         form.d-flex input:focus {
@@ -115,7 +117,7 @@
             padding: 2rem;
             background: var(--cream-bg);
         }
-        
+
         /* Divider for OR */
         .or-divider {
             display: flex;
@@ -268,18 +270,20 @@
             transform: scale(1.1);
             transition: 0.2s;
         }
-        
+
         /* Adjusted color for logged-in user links/buttons to match other icons */
         .navbar .nav-link,
         .navbar .btn {
-            color: var(--cream-bg) !important; 
+            color: var(--cream-bg) !important;
         }
+
         /* Make nav links stand out a bit more in mobile */
         @media (max-width: 991.98px) {
             .navbar .nav-link {
                 color: var(--gold-accent) !important;
                 padding: 10px 0;
             }
+
             .search-wrap {
                 margin-top: 10px;
                 margin-bottom: 10px;
@@ -347,14 +351,15 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
             transition: 0.2s ease;
         }
-        
+
         .sp-box:hover {
             background: #6d4c41 !important;
             transform: scale(1.02);
             color: #fce8c8;
         }
+
         /* Override for hover text color */
-        .sp-box:hover * { 
+        .sp-box:hover * {
             color: #fce8c8 !important;
         }
 
@@ -374,7 +379,7 @@
             border-left: 4px solid #0d6efd;
             transition: 0.2s ease;
         }
-        
+
         .notification-item:last-child {
             border-bottom: none;
         }
@@ -386,7 +391,8 @@
 
         /* Default icon if no image */
         .notif-icon {
-            flex-shrink: 0; /* Prevents icon from shrinking */
+            flex-shrink: 0;
+            /* Prevents icon from shrinking */
             width: 45px;
             height: 45px;
             background: #e8efff;
@@ -411,7 +417,8 @@
 
         /* Payment Success Popup */
         #paymentSuccessPopup {
-            z-index: 1060; /* Higher than modals (1050) */
+            z-index: 1060;
+            /* Higher than modals (1050) */
             position: fixed;
             top: 20px;
             right: 20px;
@@ -436,194 +443,250 @@
                 transform: translateY(0);
             }
         }
+
         /* ============================= */
-/* MOBILE NAV */
-/* ============================= */
+        /* MOBILE NAV */
+        /* ============================= */
 
-.mobile-nav {
-  display: none;
-}
+        .mobile-nav {
+            display: none;
+        }
 
-@media (max-width: 991px) {
-  .mobile-nav {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background: #fff;
-    border-top: 1px solid #eee;
-    padding: 8px 0;
-    z-index: 1030;
-  }
+        @media (max-width: 991px) {
+            .mobile-nav {
+                display: block;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+                background: #fff;
+                border-top: 1px solid #eee;
+                padding: 8px 0;
+                z-index: 1030;
+            }
 
-  .mobile-nav .nav-container {
-    display: flex;
-    justify-content: space-around;
-  }
+            .mobile-nav .nav-container {
+                display: flex;
+                justify-content: space-around;
+            }
 
-  .mobile-nav a {
-    font-size: 12px;
-    color: #555;
-    text-decoration: none;
-  }
+            .mobile-nav a {
+                font-size: 12px;
+                color: #555;
+                text-decoration: none;
+            }
 
-  .mobile-nav a i {
-    display: block;
-    font-size: 18px;
-  }
+            .mobile-nav a i {
+                display: block;
+                font-size: 18px;
+            }
 
 
 
-}
+        }
 
-/* MOBILE HEADER STYLES */
-@media (max-width: 991px) {
-    .navbar {
-        background: #fff !important; /* Airbnb white look */
-        padding: 10px 0;
+        /* MOBILE HEADER STYLES */
+        @media (max-width: 991px) {
+            .navbar {
+                background: #fff !important;
+                /* Airbnb white look */
+                padding: 10px 0;
+            }
+
+            .navbar-brand {
+                color: #222 !important;
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+
+            /* Voucher Box Styling */
+            .mobile-voucher-box {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                background: #f7f7f7;
+                padding: 5px 12px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                font-weight: 600;
+                font-size: 0.9rem;
+                color: #222;
+            }
+
+            .mobile-voucher-box i {
+                color: #ff9800;
+                /* Gold/Orange color */
+            }
+            /* Voucher Box Styling */
+            .decktop-voucher-box {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                background: #f7f7f7;
+                padding: 5px 12px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                font-weight: 600;
+                font-size: 0.9rem;
+                color: #222;
+            }
+
+            .decktop-voucher-box i {
+                color: #ff9800;
+                /* Gold/Orange color */
+            }
+
+            /* Icon styling */
+            .mobile-search-trigger,
+            .mobile-nav-icon {
+                font-size: 1.2rem;
+                color: #222;
+                padding: 5px;
+            }
+
+            /* Notification Badge */
+            .mobile-badge {
+                position: absolute;
+                top: 3px;
+                right: 3px;
+                width: 8px;
+                height: 8px;
+                background: #ff385c;
+                border-radius: 50%;
+                border: 1px solid #fff;
+            }
+
+            /* Expandable Search Input */
+            /* Ensure the mobile expander actually covers the bar when active */
+            .mobile-search-expand {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: white;
+                z-index: 1050;
+                /* Above navbar */
+                align-items: center;
+                padding: 0 15px;
+            }
+
+            .mobile-search-expand.active {
+                display: flex !important;
+            }
+        }
+
+        /* Ensure Desktop Search/Icons stay hidden on Mobile via Classes */
+        @media (min-width: 992px) {
+            .mobile-only-header {
+                display: none !important;
+            }
+        }
+    
+    /* Premium List Group inside Modal */
+    #accountModal .list-group-item {
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
     }
 
-    .navbar-brand {
-        color: #222 !important;
-        font-weight: 700;
-        font-size: 1.1rem;
+    #accountModal .list-group-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
     }
 
-    /* Voucher Box Styling */
-    .mobile-voucher-box {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: #f7f7f7;
-        padding: 5px 12px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: #222;
+    /* Modal Backdrop Blur (Optional, looks very modern) */
+    .modal-backdrop.show {
+        backdrop-filter: blur(4px);
+        background-color: rgba(0, 0, 0, 0.4);
     }
 
-    .mobile-voucher-box i {
-        color: #ff9800; /* Gold/Orange color */
+    /* Ensure Modal is above everything else */
+    #accountModal {
+        z-index: 2000 !important;
+    }
+    
+    /* ... (keep your existing root and base styles) ... */
+
+    /* FIX 1: Ensure desktop nav items are visible and centered */
+    @media (min-width: 992px) {
+        .navbar {
+            background: linear-gradient(90deg, var(--brown-medium), var(--brown-dark)) !important;
+        }
+        
+        .navbar-brand {
+            color: var(--gold-accent) !important;
+        }
+
+        /* Show the collapse menu on desktop */
+        .navbar-collapse.collapse {
+            display: flex !important;
+            flex-basis: auto;
+        }
+        
+        /* Hide mobile-only elements on desktop */
+        .mobile-search-trigger,
+        .mobile-voucher-box,
+        .mobile-nav-icon {
+            display: none !important;
+        }
     }
 
-    /* Icon styling */
-    .mobile-search-trigger, .mobile-nav-icon {
-        font-size: 1.2rem;
-        color: #222;
-        padding: 5px;
+    /* FIX 2: Correcting the Search Bar visibility */
+    .search-wrap .form-control {
+        background: #fff;
+        border-radius: 20px 0 0 20px;
     }
+    
 
-    /* Notification Badge */
-    .mobile-badge {
-        position: absolute;
-        top: 3px;
-        right: 3px;
-        width: 8px;
-        height: 8px;
-        background: #ff385c;
-        border-radius: 50%;
-        border: 1px solid #fff;
+
+    /* ... (keep your existing root and base styles) ... */
+
+    /* FIX 1: Ensure desktop nav items are visible and centered */
+    @media (min-width: 992px) {
+        .navbar {
+            background: linear-gradient(90deg, var(--brown-medium), var(--brown-dark)) !important;
+        }
+
+        .navbar-brand {
+            color: var(--gold-accent) !important;
+        }
+        
+        /* Show the collapse menu on desktop */
+        .navbar-collapse.collapse {
+            display: flex !important;
+            flex-basis: auto;
+        }
+        
+        /* Hide mobile-only elements on desktop */
+        .mobile-search-trigger,
+        .mobile-voucher-box,
+        .mobile-nav-icon {
+            display: none !important;
+        }
     }
-
-    /* Expandable Search Input */
-/* Ensure the mobile expander actually covers the bar when active */
-.mobile-search-expand {
-    display: none; 
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    z-index: 1050; /* Above navbar */
-    align-items: center;
-    padding: 0 15px;
-}
-
-.mobile-search-expand.active {
-    display: flex !important;
-}
-}
-
-/* Ensure Desktop Search/Icons stay hidden on Mobile via Classes */
-@media (min-width: 992px) {
-    .mobile-only-header { display: none !important; }
-}
-
-</style>
-</head>
-<style>
-/* ... (keep your existing root and base styles) ... */
-
-/* FIX 1: Ensure desktop nav items are visible and centered */
-@media (min-width: 992px) {
-    .navbar {
-        background: linear-gradient(90deg, var(--brown-medium), var(--brown-dark)) !important;
+    
+    /* FIX 2: Correcting the Search Bar visibility */
+    .search-wrap .form-control {
+        background: #fff;
+        border-radius: 20px 0 0 20px;
     }
-    .navbar-brand {
-        color: var(--gold-accent) !important;
+    
+    .search-wrap .btn {
+        background: #3f2a0d;
     }
-    /* Show the collapse menu on desktop */
-    .navbar-collapse.collapse {
-        display: flex !important;
-        flex-basis: auto;
-    }
-    /* Hide mobile-only elements on desktop */
-    .mobile-search-trigger, .mobile-voucher-box, .mobile-nav-icon {
-        display: none !important;
-    }
-}
-
-/* FIX 2: Correcting the Search Bar visibility */
-.search-wrap .form-control {
-    background: #fff;
-    border-radius: 20px 0 0 20px;
-}
-.search-wrap .btn {
-    border-radius: 0 20px 20px 0;
-    background: var(--gold-accent);
-}
-/* ... (keep your existing root and base styles) ... */
-
-/* FIX 1: Ensure desktop nav items are visible and centered */
-@media (min-width: 992px) {
-    .navbar {
-        background: linear-gradient(90deg, var(--brown-medium), var(--brown-dark)) !important;
-    }
-    .navbar-brand {
-        color: var(--gold-accent) !important;
-    }
-    /* Show the collapse menu on desktop */
-    .navbar-collapse.collapse {
-        display: flex !important;
-        flex-basis: auto;
-    }
-    /* Hide mobile-only elements on desktop */
-    .mobile-search-trigger, .mobile-voucher-box, .mobile-nav-icon {
-        display: none !important;
-    }
-}
-
-/* FIX 2: Correcting the Search Bar visibility */
-.search-wrap .form-control {
-    background: #fff;
-    border-radius: 20px 0 0 20px;
-}
-.search-wrap .btn {
-    border-radius: 0 20px 20px 0;
-    background: var(--gold-accent);
-}
-
-/* ... (keep your existing mobile styles) ... */
-</style>
+    
+    /* ... (keep your existing mobile styles) ... */
+    </style>
+    </head>
 <div id="mobileSearchInput" class="mobile-search-expand d-lg-none">
-                <form class="d-flex search-wrap my-2 my-lg-0 me-lg-3 w-100 w-lg-auto" action="/search">
-                    <input class="form-control search-input me-2 flex-grow-1" type="search" name="q" placeholder="Search items" aria-label="Search">
-                    <button class="btn btn-sm text-dark" type="submit">
-                        <i class="fa-solid fa-search"></i>
-                    </button>
-                </form>
+    <form class="d-flex search-wrap my-2 my-lg-0 me-lg-3 w-100 w-lg-auto" action="/search">
+        <input class="form-control search-input me-2 flex-grow-1" type="search" name="q" placeholder="Search items"
+        aria-label="Search">
+        <button class="btn btn-sm text-dark" type="submit">
+            <i class="fa-solid fa-search"></i>
+        </button>
+    </form>
 </div>
 <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container-fluid flex-nowrap">
@@ -634,384 +697,452 @@
 
         <div class="d-flex d-lg-none align-items-center gap-3">
             <div id="mobileSearchInput" class="mobile-search-trigger" onclick="toggleMobileSearch()">
-                <i  class="fa-solid fa-magnifying-glass"></i>
+                <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-            <% if(typeof currUser !== 'undefined' && currUser){ %>
+            <% if(typeof currUser !=='undefined' && currUser){ %>
                 <div class="mobile-voucher-box" data-bs-toggle="modal" data-bs-target="#coinModal">
                     <i class="fa-solid fa-ticket"></i>
-                    <span><%= currUser.ppCoins || 0 %></span>
+                    <span>
+                        <%= currUser.ppCoins || 0 %>
+                    </span>
                 </div>
-                <div class="mobile-nav-icon position-relative" data-bs-toggle="modal" data-bs-target="#notificationModal">
+                <div class="mobile-nav-icon position-relative" data-bs-toggle="modal"
+                    data-bs-target="#notificationModal">
                     <i class="fa-solid fa-bell"></i>
-                    <% if(typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                    <% if(typeof notifications !=='undefined' && notifications.length> 0) { %>
                         <span class="mobile-badge"></span>
+                        <% } %>
+                    </div>
                     <% } %>
-                </div>
-            <% } %>
         </div>
-
+        
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link" href="/"><i class="fa-solid fa-box me-1"></i> Products</a></li>
-                <li class="nav-item"><a class="nav-link" href="/store"><i class="fa-solid fa-store me-1"></i> Shops</a></li>
-                <li class="nav-item"><a class="nav-link" href="/cart/view"><i class="fa-solid fa-shopping-cart me-1"></i> Cart</a></li>
+                <li class="nav-item"><a class="nav-link" href="/store"><i class="fa-solid fa-store me-1"></i> Shops</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="/cart/view"><i
+                    class="fa-solid fa-shopping-cart me-1"></i> Cart</a></li>
             </ul>
-            
+
             <form class="d-flex search-wrap me-3" action="/search">
                 <input class="form-control" type="search" name="q" placeholder="Search items">
                 <button class="btn" type="submit"><i class="fa-solid fa-search"></i></button>
             </form>
-
-            <div class="navbar-nav">
-                <% if(typeof currUser === 'undefined' || !currUser) { %>
-                    <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
-                <% } else { %>
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle nav-icon" href="#" data-bs-toggle="dropdown">
-                            <i class="fa-solid fa-circle-user"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="/orders"><i class="fa-solid fa-box me-2"></i>Orders</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/user/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
-                        </ul>
+            <% if(typeof currUser !=='undefined' && currUser){ %>
+                <div class="decktop-voucher-box" data-bs-toggle="modal" data-bs-target="#coinModal">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span>
+                        <%= currUser.ppCoins || 0 %>
+                    </span>
+                </div>
+                <div class="mobile-nav-icon position-relative" data-bs-toggle="modal"
+                    data-bs-target="#notificationModal">
+                    <i class="fa-solid fa-bell"></i>
+                    <% if(typeof notifications !=='undefined' && notifications.length> 0) { %>
+                        <span class="mobile-badge"></span>
+                        <% } %>
                     </div>
-                <% } %>
+                    <% } %>
+            <div class="navbar-nav">
+                <% if(typeof currUser==='undefined' || !currUser) { %>
+                    <button class="btn btn-outline-light" data-bs-toggle="modal"
+                        data-bs-target="#loginModal">Login</button>
+                    <% } else { %>
+                       <div class="nav-item">
+    <a class="nav-link nav-icon" href="#" data-bs-toggle="modal" data-bs-target="#accountModal">
+        <i class="fa-solid fa-circle-user"></i>
+    </a>
+</div>
+                        <% } %>
             </div>
         </div>
     </div>
 </nav>
 
 
-    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loginModalLabel">Login / Sign Up</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Login / Sign Up</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                <div class="modal-body">
-                    <ul class="nav nav-tabs mb-3" id="authTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login"
-                                type="button" role="tab" aria-controls="login" aria-selected="true">Login</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register"
-                                type="button" role="tab" aria-controls="register" aria-selected="false">Register</button>
-                        </li>
-                    </ul>
+            <div class="modal-body">
+                <ul class="nav nav-tabs mb-3" id="authTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login"
+                            type="button" role="tab" aria-controls="login" aria-selected="true">Login</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register"
+                            type="button" role="tab" aria-controls="register" aria-selected="false">Register</button>
+                    </li>
+                </ul>
 
-                    <div class="tab-content">
-                        <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-                            <form action="/user/login" method="POST">
-                                <div class="mb-3">
-                                    <label class="form-label" for="loginUsername">Email</label>
-                                    <input type="text" id="loginUsername" name="username" class="form-control" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label" for="loginPassword">Password</label>
-                                    <input type="password" id="loginPassword" name="password" class="form-control" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100">Login</button>
-                            </form>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+                        <form action="/user/login" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label" for="loginUsername">Email</label>
+                                <input type="text" id="loginUsername" name="username" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="loginPassword">Password</label>
+                                <input type="password" id="loginPassword" name="password" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                        </form>
 
-                            <div class="or-divider">OR</div>
+                        <div class="or-divider">OR</div>
 
-                            <a href="/user/google" class="btn btn-google w-100 d-flex align-items-center justify-content-center">
-                                <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google logo">
-                                Continue with Google
-                            </a>
-                        </div>
+                        <a href="/user/google"
+                            class="btn btn-google w-100 d-flex align-items-center justify-content-center">
+                            <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google logo">
+                            Continue with Google
+                        </a>
+                    </div>
 
-                        <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
-                            <form action="/user/registeredUser" method="POST">
-                                <div class="mb-3">
-                                    <label for="registerUsername" class="form-label">Username</label>
-                                    <input type="text" id="registerUsername" class="form-control" name="username" required>
-                                    <small id="register-username-status"></small>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" id="email" class="form-control" name="email" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Password</label>
-                                    <input type="password" id="registerPassword" class="form-control" name="password" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="role" class="form-label">Register As</label>
-                                    <select class="form-select" id="role" name="role" required>
-                                        <option value="user" selected>User</option>
-                                        <option value="seller">Seller</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-success w-100">Register</button>
-                            </form>
-                        </div>
+                    <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                        <form action="/user/registeredUser" method="POST">
+                            <div class="mb-3">
+                                <label for="registerUsername" class="form-label">Username</label>
+                                <input type="text" id="registerUsername" class="form-control" name="username" required>
+                                <small id="register-username-status"></small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" id="email" class="form-control" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" id="registerPassword" class="form-control" name="password"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Register As</label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="user" selected>User</option>
+                                    <option value="seller">Seller</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Register</button>
+                        </form>
                     </div>
                 </div>
+            </div>
 
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="verifyOtpModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Email Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/user/verify-otp" method="POST">
+                    <input type="hidden" name="email" id="otpEmail" value="">
+                    <input type="hidden" name="username" id="otpUsername" value="">
+                    <div class="mb-3">
+                        <label for="otp" class="form-label">Enter OTP</label>
+                        <input type="text" id="otp" class="form-control" name="otp" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Verify</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="verifyOtpModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Email Verification</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="/user/verify-otp" method="POST">
-                        <input type="hidden" name="email" id="otpEmail" value=""> 
-                        <input type="hidden" name="username" id="otpUsername" value="">
-                        <div class="mb-3">
-                            <label for="otp" class="form-label">Enter OTP</label>
-                            <input type="text" id="otp" class="form-control" name="otp" required>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">Verify</button>
-                    </form>
-                </div>
+<div class="modal fade" id="coinModal" tabindex="-1" aria-labelledby="coinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4 text-center">
+
+            <div class="gold-coin mb-2">
+                <i class="fa-solid fa-coins"></i>
             </div>
-        </div>
-    </div>
-    
-    <div class="modal fade" id="coinModal" tabindex="-1" aria-labelledby="coinModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4 text-center">
 
-                <div class="gold-coin mb-2">
-                    <i class="fa-solid fa-coins"></i>
-                </div>
+            <h2 class="fw-bold" id="coinModalLabel">
+                Your PP Coins: <%= typeof currUser !=='undefined' ? (currUser.ppCoins || 0) : 0 %>
+            </h2>
 
-                <h2 class="fw-bold" id="coinModalLabel">
-                    Your PP Coins: <%= typeof currUser !== 'undefined' ? (currUser.ppCoins || 0) : 0 %>
-                </h2>
+            <hr>
 
-                <hr>
+            <h5 class="text-warning mb-3">SP Coins from Stores</h5>
 
-                <h5 class="text-warning mb-3">SP Coins from Stores</h5>
+            <% if (typeof currUser !=='undefined' && currUser && currUser.shopCoins && currUser.shopCoins.length> 0) {
+                %>
 
-<% if (typeof currUser !== 'undefined' && currUser && currUser.shopCoins && currUser.shopCoins.length > 0) { %>
-
-  <% currUser.shopCoins.forEach(sp => { %>
-    <a href="/store/<%= sp.storeName.replace(/\s+/g, '-') %>" class="text-decoration-none">
-      <div class="sp-box d-flex align-items-center p-2 mb-2"
-           style="background:#4e342e; border-radius:10px; color:#fce8c8;">
-        <div class="text-start">
-          <b class="text-warning"><%= sp.storeName %></b><br>
-          <span class="text-white"><%= sp.coins %> SP</span>
-        </div>
-      </div>
-    </a>
-  <% }) %>
-
-<% } else { %>
-  <p>No SP coins earned yet.</p>
-<% } %>
-
-
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
-                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <% if (typeof notifications !== 'undefined' && notifications && notifications.length > 0) { %>
-
-                    <% notifications.forEach(n => { %>
-
-                    <div class="notification-item d-flex align-items-start p-3 mb-3 rounded shadow-sm">
-
-                        <div class="notif-icon me-3">
-                            <i class="fa-solid fa-bell"></i>
-                        </div>
-
-                        <div class="flex-grow-1">
-
-                            <div class="d-flex justify-content-between">
-                                <h6 class="mb-1 fw-semibold">
-                                    <%= n.user?.username || 'System' %>
-                                </h6>
-
-                                <span class="badge <%= n.isRead ? 'bg-secondary' : 'bg-primary' %>">
-                                    <%= n.isRead ? 'Read' : 'New' %>
+                <% currUser.shopCoins.forEach(sp=> { %>
+                    <a href="/store/<%= sp.storeName.replace(/\s+/g, '-') %>" class="text-decoration-none">
+                        <div class="sp-box d-flex align-items-center p-2 mb-2"
+                            style="background:#4e342e; border-radius:10px; color:#fce8c8;">
+                            <div class="text-start">
+                                <b class="text-warning">
+                                    <%= sp.storeName %>
+                                </b><br>
+                                <span class="text-white">
+                                    <%= sp.coins %> SP
                                 </span>
                             </div>
+                        </div>
+                    </a>
+                    <% }) %>
 
-                            <p class="mb-1 text-muted small"><%= n.message %></p>
-
-                            <% if (n.link) { %>
-                            <a href="<%= n.link %>" class="notif-link">Open Details →</a>
+                        <% } else { %>
+                            <p>No SP coins earned yet.</p>
                             <% } %>
 
-                            <div class="text-muted mt-1 small">
-                                <i class="fa-regular fa-clock me-1"></i>
-                                <%= new Date(n.date).toLocaleString() %>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">Notifications</h5>
+                <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <% if (typeof notifications !=='undefined' && notifications && notifications.length> 0) { %>
+
+                    <% notifications.forEach(n=> { %>
+
+                        <div class="notification-item d-flex align-items-start p-3 mb-3 rounded shadow-sm">
+
+                            <div class="notif-icon me-3">
+                                <i class="fa-solid fa-bell"></i>
+                            </div>
+
+                            <div class="flex-grow-1">
+
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1 fw-semibold">
+                                        <%= n.user?.username || 'System' %>
+                                    </h6>
+
+                                    <span class="badge <%= n.isRead ? 'bg-secondary' : 'bg-primary' %>">
+                                        <%= n.isRead ? 'Read' : 'New' %>
+                                    </span>
+                                </div>
+
+                                <p class="mb-1 text-muted small">
+                                    <%= n.message %>
+                                </p>
+
+                                <% if (n.link) { %>
+                                    <a href="<%= n.link %>" class="notif-link">Open Details →</a>
+                                    <% } %>
+
+                                        <div class="text-muted mt-1 small">
+                                            <i class="fa-regular fa-clock me-1"></i>
+                                            <%= new Date(n.date).toLocaleString() %>
+                                        </div>
+
                             </div>
 
                         </div>
 
+                        <% }) %>
+
+                            <% } else { %>
+
+                                <div class="text-center text-muted py-4">
+                                    <i class="fa-regular fa-bell-slash fa-2x mb-2"></i>
+                                    <div>No notifications yet</div>
+                                </div>
+
+                                <% } %>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="paymentSuccessPopup">
+    <i class="fa-solid fa-circle-check me-1"></i> Payment Successful!
+</div>
+<div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm"> <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="accountModalLabel">My Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <% if(typeof currUser !== 'undefined' && currUser) { %>
+                    <div class="text-center mb-4">
+                        <div class="mb-2">
+                            <i class="fa-solid fa-circle-user fa-3x text-secondary"></i>
+                        </div>
+                        <h6 class="fw-bold mb-0">Hi, <%= currUser.username %></h6>
+                        <small class="text-muted"><%= currUser.email %></small>
                     </div>
+                <% } %>
 
-                    <% }) %>
-
-                    <% } else { %>
-
-                    <div class="text-center text-muted py-4">
-                        <i class="fa-regular fa-bell-slash fa-2x mb-2"></i>
-                        <div>No notifications yet</div>
-                    </div>
-
+                <div class="list-group list-group-flush">
+                    <a href="/profile" class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3">
+                        <i class="fa-solid fa-user me-3 text-primary"></i> Profile
+                    </a>
+                    <a href="/orders" class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3">
+                        <i class="fa-solid fa-box me-3 text-primary"></i> My Orders
+                    </a>
+                    <hr class="my-2 mx-3">
+                                        <% if(currUser && currUser.role === 'admin') {%>
+                    <a href="/admin" class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3">
+                        <i class="fa-solid fa-chart-line me-3 text-success"></i> Admin Dashboard
+                    </a>
                     <% } %>
+                    <a href="/seller/dashboard" class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3">
+                        <i class="fa-solid fa-chart-line me-3 text-success"></i> Seller Dashboard
+                    </a>
+                                        <hr class="my-2 mx-3">
 
+                    <a href="/user/logout" class="list-group-item list-group-item-action border-0 d-flex align-items-center py-3 text-danger">
+                        <i class="fa-solid fa-right-from-bracket me-3"></i> Logout
+                    </a>
                 </div>
-
             </div>
         </div>
     </div>
-    
-    <div id="paymentSuccessPopup">
-        <i class="fa-solid fa-circle-check me-1"></i> Payment Successful!
-    </div>
-    <!-- MOBILE NAV -->
+</div>
+<!-- MOBILE NAV -->
 <div class="mobile-nav">
-  <div class="nav-container">
-    <a href="/"><i class="fa fa-home"></i>Home</a>
-    <a href="/cart/view"><i class="fa fa-shopping-cart"></i>Cart</a>
-    <a href="/store"><i class="fa fa-store"></i>Shops</a>
-    <a href="/profile"><i class="fa fa-user"></i>Profile</a>
-  </div>
+    <div class="nav-container">
+        <a href="/"><i class="fa fa-home"></i>Home</a>
+        <a href="/cart/view"><i class="fa fa-shopping-cart"></i>Cart</a>
+        <a href="/store"><i class="fa fa-store"></i>Shops</a>
+<a href="#" data-bs-toggle="modal" data-bs-target="#accountModal">
+    <i class="fa fa-user"></i>Account
+</a>    </div>
 </div>
 
 
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        // Global function to show the payment success popup
-        function showPaymentSuccess() {
-            const popup = document.getElementById('paymentSuccessPopup');
-            if(popup) {
-                popup.style.display = "block";
+<script>
+    // Global function to show the payment success popup
+    function showPaymentSuccess() {
+        const popup = document.getElementById('paymentSuccessPopup');
+        if (popup) {
+            popup.style.display = "block";
 
-                setTimeout(() => {
-                    popup.style.display = "none";
-                }, 2000);
-            }
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 2000);
         }
-        
-        // Auto-open Modals on Load based on URL parameters
-        document.addEventListener("DOMContentLoaded", function () {
-            const urlParams = new URLSearchParams(window.location.search);
+    }
 
-            // Auto open login modal
-            if (urlParams.get("showLogin") === "true") {
-                const loginModalEl = document.getElementById("loginModal");
-                if (loginModalEl) {
-                    const loginModal = new bootstrap.Modal(loginModalEl);
-                    loginModal.show();
+    // Auto-open Modals on Load based on URL parameters
+    document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
 
-                    if (urlParams.get("tab") === "register") {
-                        document.querySelector("#login-tab")?.classList.remove("active");
-                        document.querySelector("#login")?.classList.remove("show", "active");
-                        document.querySelector("#register-tab")?.classList.add("active");
-                        document.querySelector("#register")?.classList.add("show", "active");
-                    }
+        // Auto open login modal
+        if (urlParams.get("showLogin") === "true") {
+            const loginModalEl = document.getElementById("loginModal");
+            if (loginModalEl) {
+                const loginModal = new bootstrap.Modal(loginModalEl);
+                loginModal.show();
+
+                if (urlParams.get("tab") === "register") {
+                    document.querySelector("#login-tab")?.classList.remove("active");
+                    document.querySelector("#login")?.classList.remove("show", "active");
+                    document.querySelector("#register-tab")?.classList.add("active");
+                    document.querySelector("#register")?.classList.add("show", "active");
                 }
             }
+        }
 
-            // Auto open OTP modal
-            if (urlParams.get("showVerifyOtp") === "true") {
-                const otpModalEl = document.getElementById("verifyOtpModal");
-                if (otpModalEl) {
-                    const email = urlParams.get("email") || "";
-                    const username = urlParams.get("username") || "";
-                    document.getElementById("otpEmail").value = email;
-                    document.getElementById("otpUsername").value = username;
-                    const otpModal = new bootstrap.Modal(otpModalEl);
-                    otpModal.show();
+        // Auto open OTP modal
+        if (urlParams.get("showVerifyOtp") === "true") {
+            const otpModalEl = document.getElementById("verifyOtpModal");
+            if (otpModalEl) {
+                const email = urlParams.get("email") || "";
+                const username = urlParams.get("username") || "";
+                document.getElementById("otpEmail").value = email;
+                document.getElementById("otpUsername").value = username;
+                const otpModal = new bootstrap.Modal(otpModalEl);
+                otpModal.show();
+            }
+        }
+    });
+</script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // NOTE: The socket.io implementation below assumes you have a running server
+    // sending 'usernameStatus' events. This script is client-side only.
+
+    const socket = io();
+
+    const usernameInput = document.getElementById("registerUsername");
+    const statusText = document.getElementById("register-username-status");
+
+    if (usernameInput && statusText) {
+        usernameInput.addEventListener("input", () => {
+            const username = usernameInput.value.trim();
+            if (username.length > 0) {
+                // Check only when a sufficient number of characters is typed
+                if (username.length >= 3) {
+                    socket.emit("checkUsername", username);
+                    statusText.textContent = "Checking availability...";
+                    statusText.classList.remove("text-success", "text-danger");
+                    usernameInput.classList.remove("is-valid", "is-invalid"); // Clear validation classes
+                } else {
+                    statusText.textContent = "Username must be at least 3 characters.";
+                    statusText.classList.remove("text-success");
+                    statusText.classList.add("text-danger");
+                    usernameInput.classList.remove("is-valid", "is-invalid");
                 }
             }
         });
-    </script>
-    
-    <script src="/socket.io/socket.io.js"></script> 
-    <script>
-        // NOTE: The socket.io implementation below assumes you have a running server
-        // sending 'usernameStatus' events. This script is client-side only.
 
-        const socket = io();
-
-        const usernameInput = document.getElementById("registerUsername");
-        const statusText = document.getElementById("register-username-status");
-
-        if (usernameInput && statusText) {
-            usernameInput.addEventListener("input", () => {
-                const username = usernameInput.value.trim();
-                if (username.length > 0) {
-                    // Check only when a sufficient number of characters is typed
-                    if (username.length >= 3) { 
-                        socket.emit("checkUsername", username);
-                        statusText.textContent = "Checking availability...";
-                        statusText.classList.remove("text-success", "text-danger");
-                        usernameInput.classList.remove("is-valid", "is-invalid"); // Clear validation classes
-                    } else {
-                        statusText.textContent = "Username must be at least 3 characters.";
-                        statusText.classList.remove("text-success");
-                        statusText.classList.add("text-danger");
-                        usernameInput.classList.remove("is-valid", "is-invalid");
-                    }
-                }
-            });
-
-            socket.on("usernameStatus", (isAvailable) => {
-                if (isAvailable) {
-                    statusText.textContent = "Username is available!";
-                    statusText.classList.remove("text-danger");
-                    statusText.classList.add("text-success");
-                    usernameInput.classList.remove("is-invalid");
-                    usernameInput.classList.add("is-valid");
-                } else {
-                    statusText.textContent = "Username is taken.";
-                    statusText.classList.remove("text-success");
-                    statusText.classList.add("text-danger");
-                    usernameInput.classList.remove("is-valid");
-                    usernameInput.classList.add("is-invalid");
-                }
-            });
-        }
-    </script>
-    <script>
-function toggleMobileSearch() {
-    const searchBar = document.getElementById('mobileSearchInput');
-    if (!searchBar) return;
-
-    searchBar.classList.toggle('active');
-    
-    // Add a slight delay to allow the CSS 'display: flex' to trigger 
-    // before attempting to focus the cursor.
-    if(searchBar.classList.contains('active')) {
-        setTimeout(() => {
-            const input = searchBar.querySelector('input');
-            if(input) input.focus();
-        }, 100);
+        socket.on("usernameStatus", (isAvailable) => {
+            if (isAvailable) {
+                statusText.textContent = "Username is available!";
+                statusText.classList.remove("text-danger");
+                statusText.classList.add("text-success");
+                usernameInput.classList.remove("is-invalid");
+                usernameInput.classList.add("is-valid");
+            } else {
+                statusText.textContent = "Username is taken.";
+                statusText.classList.remove("text-success");
+                statusText.classList.add("text-danger");
+                usernameInput.classList.remove("is-valid");
+                usernameInput.classList.add("is-invalid");
+            }
+        });
     }
-}
+</script>
+<script>
+    function toggleMobileSearch() {
+        const searchBar = document.getElementById('mobileSearchInput');
+        if (!searchBar) return;
+
+        searchBar.classList.toggle('active');
+
+        // Add a slight delay to allow the CSS 'display: flex' to trigger 
+        // before attempting to focus the cursor.
+        if (searchBar.classList.contains('active')) {
+            setTimeout(() => {
+                const input = searchBar.querySelector('input');
+                if (input) input.focus();
+            }, 100);
+        }
+    }
 </script>

@@ -103,17 +103,57 @@
                   <textarea name="listing[description]" class="form-control" rows="3"><%= newListing.description || '' %></textarea>
                 </div>
 
-                <% if (newListing.image && newListing.image.url) { %>
-                  <div class="mb-3 text-center">
-                    <img src="<%= newListing.image.url %>" alt="Image" class="img-fluid rounded" style="max-height:200px;" />
-                    <p class="small text-muted">Current Image</p>
-                  </div>
-                <% } %>
+<% if (newListing.images && newListing.images.length > 0) { %>
+  <div class="mb-4">
+    <label class="form-label fw-bold">Current Images</label>
+
+    <div class="row g-3">
+      <% ["front","back","side","full"].forEach(function(label){ 
+          const img = newListing.images.find(i => i.label === label);
+      %>
+        <div class="col-6 text-center">
+          <div class="border rounded p-2">
+            <% if (img) { %>
+              <img 
+                src="<%= img.url.replace('/upload/', '/upload/w_300,q_auto,f_auto/') %>" 
+                class="img-fluid rounded mb-2"
+                style="height:150px; object-fit:cover;"
+              >
+              <div class="small text-muted text-capitalize"><%= label %> view</div>
+            <% } else { %>
+              <div class="text-muted small">No <%= label %> image</div>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
                 <div class="mb-3">
                   <label class="form-label">Replace Image</label>
                   <div id="dropZone"><p class="text-muted mb-0">Drag & Drop or Click</p></div>
-                  <input type="file" id="image" name="listing[image]" accept="image/*" style="display:none;">
-                </div>
+<div class="mb-4">
+  <label class="form-label fw-bold">Replace Images</label>
+
+  <div class="row g-3">
+    <% ["front","back","side","full"].forEach(function(label){ %>
+      <div class="col-6">
+        <label class="form-label text-capitalize"><%= label %> Image</label>
+        <div class="drop-zone border rounded p-3 text-center" data-input="<%= label %>Input">
+          <p class="text-muted mb-1">Drag & Drop</p>
+          <small>or click to upload</small>
+        </div>
+        <input 
+          type="file" 
+          name="<%= label %>Image" 
+          id="<%= label %>Input"
+          accept="image/*"
+          style="display:none;"
+        >
+      </div>
+    <% }) %>
+  </div>
+</div>                </div>
 
                 <!-- Business Mode -->
                 <div class="mb-3">
@@ -194,28 +234,39 @@
       </div>
     </div>
 
-    <script>
-      (function() {
-        var dropZone = document.getElementById("dropZone");
-        var fileInput = document.getElementById("image");
-        if (dropZone && fileInput) {
-          dropZone.addEventListener("click", function() { fileInput.click(); });
-          dropZone.addEventListener("dragover", function(e) { e.preventDefault(); dropZone.classList.add("dragover"); });
-          dropZone.addEventListener("dragleave", function() { dropZone.classList.remove("dragover"); });
-          dropZone.addEventListener("drop", function(e) {
-            e.preventDefault();
-            dropZone.classList.remove("dragover");
-            if (e.dataTransfer.files.length) {
-              fileInput.files = e.dataTransfer.files;
-              dropZone.innerHTML = "<p><strong>" + e.dataTransfer.files[0].name + "</strong> selected</p>";
-            }
-          });
-          fileInput.addEventListener("change", function() {
-            if (fileInput.files.length > 0) dropZone.innerHTML = "<p><strong>" + fileInput.files[0].name + "</strong> selected</p>";
-          });
-        }
-      })();
-    </script>
+<script>
+document.querySelectorAll(".drop-zone").forEach(zone => {
+  const inputId = zone.dataset.input;
+  const input = document.getElementById(inputId);
+
+  zone.addEventListener("click", () => input.click());
+
+  zone.addEventListener("dragover", e => {
+    e.preventDefault();
+    zone.classList.add("bg-light");
+  });
+
+  zone.addEventListener("dragleave", () => {
+    zone.classList.remove("bg-light");
+  });
+
+  zone.addEventListener("drop", e => {
+    e.preventDefault();
+    zone.classList.remove("bg-light");
+
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      zone.innerHTML = `<strong>${e.dataTransfer.files[0].name}</strong>`;
+    }
+  });
+
+  input.addEventListener("change", () => {
+    if (input.files.length) {
+      zone.innerHTML = `<strong>${input.files[0].name}</strong>`;
+    }
+  });
+});
+</script>
 
   </body>
 

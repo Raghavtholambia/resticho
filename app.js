@@ -160,6 +160,7 @@ app.use((req, res, next) => {
 
   res.locals.notifications = req.user ? req.user.notifications || [] : [];
   res.locals.googleApiKey = process.env.GOOGLE_API_KEY;
+  res.locals.totalPages = 1;
   next();
 });
 
@@ -167,6 +168,7 @@ app.use((req, res, next) => {
     res.locals.query = req.query;
     next();
 });
+
 // 🧩 Load categories for navbar
 app.use(async (req, res, next) => {
   try {

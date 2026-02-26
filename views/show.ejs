@@ -334,7 +334,7 @@
     .mobile-rent-bar {
       display: none;
       position: fixed;
-      bottom: 0;
+      bottom: 45px;
       left: 0;
       right: 0;
       background: #fff;
@@ -605,6 +605,41 @@
         font-size: 3rem;
       }
     }
+
+    .thumb-image {
+      border: 2px solid transparent;
+      transition: 0.2s ease;
+    }
+
+    .thumb-image:hover {
+      transform: scale(1.05);
+    }
+
+    .thumb-image.active-thumb {
+      border: 2px solid #000;
+    }
+    .gallery-nav {
+  position: absolute;
+  top: 50%;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.gallery-nav:hover {
+  background: rgba(0,0,0,0.8);
+}
+
+.prev-btn { left: 10px; }
+.next-btn { right: 10px; }
+
+.thumb-image.active-thumb {
+  border: 2px solid #000;
+}
   </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -629,12 +664,70 @@
   <div class="product-container">
     <div class="product-grid">
       <div>
-        <div class="gallery-section fade-in">
-          <div class="main-image-container">
-            <img src="<%= clickListing.image.url %>" alt="<%= clickListing.itemName %>">
-          </div>
-        </div>
+<div class="gallery-section fade-in">
+  <div class="main-image-container position-relative">
 
+    <% if (clickListing.images && clickListing.images.length > 0) { %>
+
+      <% const optimizedImages = clickListing.images.map(img => 
+        img.url.replace('/upload/', '/upload/w_900,q_auto,f_auto/')
+      ); %>
+
+      <!-- MAIN IMAGE -->
+      <div class="main-display text-center position-relative">
+        <img 
+          id="mainProductImage"
+          src="<%= optimizedImages[0] %>"
+          class="img-fluid rounded shadow"
+          style="max-height:520px; object-fit:contain; transition:0.3s ease;"
+        >
+
+        <!-- PREV BUTTON -->
+        <% if (optimizedImages.length > 1) { %>
+          <button type="button" class="gallery-nav prev-btn" onclick="changeSlide(-1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <!-- NEXT BUTTON -->
+          <button type="button" class="gallery-nav next-btn" onclick="changeSlide(1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        <% } %>
+      </div>
+
+      <!-- THUMBNAILS -->
+      <div class="d-flex justify-content-center gap-3 mt-3 flex-wrap">
+        <% optimizedImages.forEach(function(img, index){ %>
+          <img 
+            src="<%= img.replace('/upload/', '/upload/w_200,q_auto,f_auto/') %>"
+            class="img-thumbnail thumb-image <%= index === 0 ? 'active-thumb' : '' %>"
+            data-index="<%= index %>"
+            style="width:80px; height:80px; object-fit:cover; cursor:pointer; transition:0.2s ease;"
+            onclick="setSlide(<%= index %>)"
+          >
+        <% }); %>
+      </div>
+
+    <% } else { %>
+
+      <div class="text-center p-5 bg-light rounded">
+        <p class="text-muted">No images uploaded</p>
+      </div>
+
+    <% } %>
+
+  </div>
+</div>
+<div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+  <% clickListing.images.forEach(function(img, index){ %>
+    <img 
+      src="<%= img.url.replace('/upload/', '/upload/c_fill,w_200,h_200,q_auto,f_auto/') %>"
+      class="img-thumbnail thumb-image"
+      style="width:80px; height:80px; object-fit:cover; cursor:pointer;"
+      onclick="setSlide(<%= index %>)"
+    >
+  <% }); %>
+</div>
         <div class="product-info fade-in">
           <span class="category-badge"><i class="fas fa-tag"></i>
             <%= clickListing.category %>
@@ -644,23 +737,31 @@
           </h1>
 
           <div class="price-section">
-            <% const pricing = clickListing.pricing || {}; %>
-            <% if (clickListing.businessMode === 'rental' || clickListing.businessMode === 'both') { %>
-              <div class="price-label">Daily Rental</div>
-              <div><span class="price-amount">₹<%= (pricing.rentalPricePerDay || 0).toLocaleString("en-IN") %></span><span class="price-period">/ day</span></div>
-              <% if (pricing.securityDeposit && pricing.securityDeposit > 0) { %><div class="price-label mt-1">Security deposit: ₹<%= pricing.securityDeposit.toLocaleString("en-IN") %></div><% } %>
-            <% } %>
-            <% if (clickListing.businessMode === 'custom' || clickListing.businessMode === 'both') { %>
-              <div class="price-label mt-2">Stitching base</div>
-              <div><span class="price-amount">₹<%= (pricing.stitchingBasePrice || 0).toLocaleString("en-IN") %></span><span class="price-period">/ piece</span></div>
-              <div class="price-label mt-1">Delivery in <%= clickListing.stitchingDurationDays || 3 %> days</div>
-            <% } %>
+            <% const pricing=clickListing.pricing || {}; %>
+              <% if (clickListing.businessMode==='rental' || clickListing.businessMode==='both' ) { %>
+                <div class="price-label">Daily Rental</div>
+                <div><span class="price-amount">₹<%= (pricing.rentalPricePerDay || 0).toLocaleString("en-IN") %>
+                      </span><span class="price-period">/ day</span></div>
+                <% if (pricing.securityDeposit && pricing.securityDeposit> 0) { %><div class="price-label mt-1">Security
+                    deposit: ₹<%= pricing.securityDeposit.toLocaleString("en-IN") %>
+                  </div>
+                  <% } %>
+                    <% } %>
+                      <% if (clickListing.businessMode==='custom' || clickListing.businessMode==='both' ) { %>
+                        <div class="price-label mt-2">Stitching base</div>
+                        <div><span class="price-amount">₹<%= (pricing.stitchingBasePrice || 0).toLocaleString("en-IN")
+                              %></span><span class="price-period">/ piece</span></div>
+                        <div class="price-label mt-1">Delivery in <%= clickListing.stitchingDurationDays || 3 %> days
+                        </div>
+                        <% } %>
           </div>
-          <% if ((clickListing.businessMode === 'rental' || clickListing.businessMode === 'both') && clickListing.stock) { %>
-            <span class="stock-badge">In stock: <%= clickListing.stock.availableQuantity %> / <%= clickListing.stock.totalQuantity %></span>
-          <% } %>
-          <% if (clickListing.occasions && clickListing.occasions.length) { %>
-            <div class="mt-2"><small class="text-muted">Occasions: <%= clickListing.occasions.join(', ') %></small></div>
+          <% if ((clickListing.businessMode==='rental' || clickListing.businessMode==='both' ) &&
+            clickListing.totalStock) { %>
+            <span class="stock-badge">In stock: <%= clickListing.stock.availableQuantity %> / <%=
+                  clickListing.stock.totalQuantity %></span>
+            <% } %>
+              <% if (clickListing.occasions && clickListing.occasions.length) { %>
+                <div class="mt-2"><small class="text-muted">Occasions: <%= clickListing.occasions.join(', ') %></small></div>
           <% } %>
 
           <p class="text-muted">
@@ -677,7 +778,7 @@
       </div>
 
       <div>
-        <div class="rental-card fade-in" id="rentalCard">
+  <div class="rental-card fade-in" id="rentalCard">
           <form action="/cart/add/<%= clickListing._id %>" method="POST" id="rentForm">
             <% const isCustom = clickListing.businessMode === 'custom' || clickListing.businessMode === 'both'; %>
             <% const isRental = clickListing.businessMode === 'rental' || clickListing.businessMode === 'both'; %>
@@ -768,60 +869,126 @@
         </div>
       </div>
     </div>
-  </div>
+        </div>
+      </div>
+    </div>
 
-  <script>
-    const listingId = "<%= clickListing._id %>";
-    const businessMode = "<%= clickListing.businessMode || 'custom' %>";
-    const pricing = { rentalPricePerDay: Number("<%= (clickListing.pricing && clickListing.pricing.rentalPricePerDay) || 0 %>"), stitchingBasePrice: Number("<%= (clickListing.pricing && clickListing.pricing.stitchingBasePrice) || 0 %>") };
-    let flatpickrInstance = null;
+    <script>
+      const listingId = "<%= clickListing._id %>";
+      const businessMode = "<%= clickListing.businessMode || 'custom' %>";
+      const pricing = { rentalPricePerDay: Number("<%= (clickListing.pricing && clickListing.pricing.rentalPricePerDay) || 0 %>"), stitchingBasePrice: Number("<%= (clickListing.pricing && clickListing.pricing.stitchingBasePrice) || 0 %>") };
+      let flatpickrInstance = null;
 
-    var rentCal = document.getElementById("rentCalendar");
-    if (rentCal && (businessMode === "rental" || businessMode === "both")) {
-      fetch("/api/bookings/listing/" + listingId).then(function(r){ return r.json(); }).then(function(data){
-        var disabled = (data.blockedDates || []).map(function(b){ return { from: new Date(b.startDate), to: new Date(b.endDate) }; });
-        flatpickrInstance = flatpickr(rentCal, { mode: "range", minDate: "today", dateFormat: "Y-m-d", disable: disabled, onChange: function(dates){ if(dates.length===2){ document.getElementById("hiddenStartDate").value = dates[0].toISOString().split("T")[0]; document.getElementById("hiddenEndDate").value = dates[1].toISOString().split("T")[0]; recalc(); } } });
-      }).catch(function(){});
-    }
-
-    function getFabricExtra() {
-      var sel = document.getElementById("fabricSelect");
-      if (!sel || !sel.options[sel.selectedIndex]) return 0;
-      return Number(sel.options[sel.selectedIndex].getAttribute("data-extra")) || 0;
-    }
-
-    function recalc() {
-      var qty = parseInt(document.getElementById("quantity").value, 10) || 1;
-      var total = 0;
-      if (businessMode === "custom" || businessMode === "both") {
-        total = (pricing.stitchingBasePrice + getFabricExtra()) * qty;
+      var rentCal = document.getElementById("rentCalendar");
+      if (rentCal && (businessMode === "rental" || businessMode === "both")) {
+        fetch("/api/bookings/listing/" + listingId).then(function (r) { return r.json(); }).then(function (data) {
+          var disabled = (data.blockedDates || []).map(function (b) { return { from: new Date(b.startDate), to: new Date(b.endDate) }; });
+          flatpickrInstance = flatpickr(rentCal, { mode: "range", minDate: "today", dateFormat: "Y-m-d", disable: disabled, onChange: function (dates) { if (dates.length === 2) { document.getElementById("hiddenStartDate").value = dates[0].toISOString().split("T")[0]; document.getElementById("hiddenEndDate").value = dates[1].toISOString().split("T")[0]; recalc(); } } });
+        }).catch(function () { });
       }
-      if (businessMode === "rental" || businessMode === "both") {
-        var start = document.getElementById("hiddenStartDate") && document.getElementById("hiddenStartDate").value;
-        var end = document.getElementById("hiddenEndDate") && document.getElementById("hiddenEndDate").value;
-        if (start && end) {
-          var days = Math.ceil((new Date(end) - new Date(start)) / (1000*60*60*24)) || 1;
-          total += days * pricing.rentalPricePerDay * qty;
-        }
+
+      function getFabricExtra() {
+        var sel = document.getElementById("fabricSelect");
+        if (!sel || !sel.options[sel.selectedIndex]) return 0;
+        return Number(sel.options[sel.selectedIndex].getAttribute("data-extra")) || 0;
       }
-      var el = document.getElementById("totalAmount");
-      if (el) el.textContent = "₹" + (total || 0).toLocaleString("en-IN");
-    }
+      function recalc() {
+        var qty = parseInt(document.getElementById("quantity").value, 10) || 1;
+        var total = 0;
+        // ... your existing pricing logic ...
 
-    (function(){
-      var qtyInput = document.getElementById("quantity");
-      var qtyPlus = document.getElementById("qtyPlus");
-      var qtyMinus = document.getElementById("qtyMinus");
-      var fabricSelect = document.getElementById("fabricSelect");
-      if (fabricSelect) fabricSelect.addEventListener("change", recalc);
-      function up() { var v = parseInt(qtyInput.value,10)||1; var max = parseInt(qtyInput.getAttribute("max"),10)||99; if (v < max) { qtyInput.value = v + 1; recalc(); } }
-      function down() { var v = parseInt(qtyInput.value,10)||1; if (v > 1) { qtyInput.value = v - 1; recalc(); } }
-      if (qtyPlus) qtyPlus.addEventListener("click", up);
-      if (qtyMinus) qtyMinus.addEventListener("click", down);
-      recalc();
-    })();
-  </script>
+        var el = document.getElementById("totalAmount");
+        if (el) el.textContent = "₹" + (clickListing.pricing.stitchingBasePrice || 0).toLocaleString("en-IN");
 
+        // ADD THIS LINE to update the mobile bar
+        var mobileEl = document.getElementById("mobileTotalDisplay");
+        if (mobileEl) mobileEl.textContent = "₹" + (clickListing.pricing.stitchingBasePrice || 0).toLocaleString("en-IN");
+      }
+      (function () {
+        var qtyInput = document.getElementById("quantity");
+        var qtyPlus = document.getElementById("qtyPlus");
+        var qtyMinus = document.getElementById("qtyMinus");
+        var fabricSelect = document.getElementById("fabricSelect");
+        if (fabricSelect) fabricSelect.addEventListener("change", recalc);
+        function up() { var v = parseInt(qtyInput.value, 10) || 1; var max = parseInt(qtyInput.getAttribute("max"), 10) || 99; if (v < max) { qtyInput.value = v + 1; recalc(); } }
+        function down() { var v = parseInt(qtyInput.value, 10) || 1; if (v > 1) { qtyInput.value = v - 1; recalc(); } }
+        if (qtyPlus) qtyPlus.addEventListener("click", up);
+        if (qtyMinus) qtyMinus.addEventListener("click", down);
+        recalc();
+      })();
+    </script>
+    <div class="mobile-rent-bar">
+      <div class="mobile-price">
+        <div class="price-label">Total</div>
+        <div class="mobile-price-amount" id="mobileTotalDisplay">₹<%=pricing.stitchingBasePrice%>
+        </div>
+      </div>
+      <button type="button" class="btn-rent-now" id="openRentalModal">
+        Add to Cart
+      </button>
+    </div>
+    <script>
+      // Mobile Toggle Logic
+      const rentalCard = document.getElementById("rentalCard");
+      const openBtn = document.getElementById("openRentalModal");
+      const closeBtn = document.querySelector(".close-modal");
 
+      if (openBtn) {
+        openBtn.addEventListener("click", () => {
+          rentalCard.classList.add("active");
+        });
+      }
 
+      // You need to add a close button icon in your HTML rental-card for this:
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+          rentalCard.classList.remove("active");
+        });
+      }
+    </script>
+
+<script>
+  let currentIndex = 0;
+  const images = <%- JSON.stringify(
+    clickListing.images.map(img =>
+      img.url.replace('/upload/', '/upload/w_900,q_auto,f_auto/')
+    )
+  ) %>;
+
+  function updateMainImage() {
+    const main = document.getElementById("mainProductImage");
+    main.src = images[currentIndex];
+
+    document.querySelectorAll(".thumb-image").forEach((thumb, i) => {
+      thumb.classList.toggle("active-thumb", i === currentIndex);
+    });
+  }
+
+  function changeSlide(direction) {
+    currentIndex += direction;
+
+    if (currentIndex < 0) currentIndex = images.length - 1;
+    if (currentIndex >= images.length) currentIndex = 0;
+
+    updateMainImage();
+  }
+
+  function setSlide(index) {
+    currentIndex = index;
+    updateMainImage();
+  }
+</script>
 </body>
+<script>
+  function changeMainImage(url) {
+    const mainImg = document.getElementById("mainProductImage");
+    mainImg.src = url;
+
+    document.querySelectorAll(".thumb-image").forEach(img => {
+      img.classList.remove("active-thumb");
+      if (img.src === url) {
+        img.classList.add("active-thumb");
+      }
+    });
+  }
+</script>

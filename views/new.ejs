@@ -36,8 +36,34 @@
     <div id="dropZone" style="border: 2px dashed #6c757d; padding: 30px; text-align: center; border-radius: 10px; cursor: pointer;">
       <p class="text-muted">Drag & Drop Image Here<br>or Click to Select</p>
     </div>
-    <input type="file" id="image" name="listing[image]" accept="image/*" style="display:none;">
+<div class="mb-3">
+  <label class="form-label fw-bold">Product Images (4 Angles Recommended)</label>
+
+  <div class="row g-3">
+
+    <div class="col-md-6">
+      <label class="form-label">Front View</label>
+      <input type="file" name="frontImage" class="form-control" accept="image/*">
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Back View</label>
+      <input type="file" name="backImage" class="form-control" accept="image/*">
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Side View</label>
+      <input type="file" name="sideImage" class="form-control" accept="image/*">
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Full Outfit View</label>
+      <input type="file" name="fullImage" class="form-control" accept="image/*">
+    </div>
+
   </div>
+</div> 
+ </div>
 
   <!-- Business Mode -->
   <div class="mb-3">

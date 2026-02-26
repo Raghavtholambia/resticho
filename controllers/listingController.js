@@ -60,7 +60,8 @@ function buildMeasurementFields(listing) {
 
 module.exports.createListing = async (req, res) => {
     const { listing } = req.body;
-
+console.log("BODY:", req.body);
+console.log("FILES:", req.files);
     const store = await Store.findOne({ owner: req.user._id });
     if (!store) {
         req.flash("error", "You must create a shop before adding listings.");
@@ -101,10 +102,22 @@ module.exports.createListing = async (req, res) => {
         verifiedByAdmin: false,
     });
 
-    if (req.file) {
-        newListing.image = { url: req.file.path, filename: req.file.filename };
-    }
+const imageFields = ["frontImage", "backImage", "sideImage", "fullImage"];
 
+let images = [];
+
+imageFields.forEach((field) => {
+    if (req.files && req.files[field]) {
+        const file = req.files[field][0];
+        images.push({
+            url: file.path,
+            filename: file.filename,
+            label: field.replace("Image", "")
+        });
+    }
+});
+
+newListing.images = images;
     await newListing.save();
     req.flash("success", "Listing created. Waiting for admin approval.");
     res.redirect("/");
@@ -117,99 +130,88 @@ module.exports.createListing = async (req, res) => {
 // ⭐ GET ALL LISTINGS (ADVANCED FILTER + SORT)
 // =========================================
 module.exports.getAllListings = async (req, res) => {
-    try {
-        const {
-            search,
-            sort,
-            category,
-            mode,
-            minPrice,
-            maxPrice,
-            ratingAbove,
-            city,
-            page = 1
-        } = req.query;
+  try {
+    const {
+      search,
+      sort,
+      category,
+      mode,
+      minPrice,
+      maxPrice,
+      ratingAbove,
+      city,
+      page = 1
+    } = req.query;
 
-        const limit = 12;
-        const skip = (page - 1) * limit;
+    const limit = 12;
+    const currentPage = Number(page) || 1;
+    const skip = (currentPage - 1) * limit;
 
-        let query = {
-            isActive: { $ne: false },
-            verifiedByAdmin: true
-        };
+    let query = {
+      isActive: { $ne: false },
+      verifiedByAdmin: true
+    };
 
-        // 🔍 TEXT SEARCH
-        if (search) {
-            query.$text = { $search: search };
-        }
-
-        // 🎯 CATEGORY
-        if (category) {
-            query.category = category;
-        }
-
-        // 🎯 MODE FILTER
-        if (mode && ["rental", "custom"].includes(mode)) {
-            query.businessMode = { $in: [mode, "both"] };
-        }
-
-        // 💰 PRICE FILTER
-        if (minPrice || maxPrice) {
-            query["pricing.rentalPricePerDay"] = {};
-            if (minPrice) query["pricing.rentalPricePerDay"].$gte = Number(minPrice);
-            if (maxPrice) query["pricing.rentalPricePerDay"].$lte = Number(maxPrice);
-        }
-
-        // ⭐ RATING
-        if (ratingAbove) {
-            query.averageRating = { $gte: Number(ratingAbove) };
-        }
-
-        // 🏙️ CITY (if store has city field)
-        if (city) {
-            query.city = city;
-        }
-
-        // 📊 SORT LOGIC
-        let sortOption = { createdAt: -1 };
-
-        switch (sort) {
-            case "priceLowToHigh":
-                sortOption = { "pricing.rentalPricePerDay": 1 };
-                break;
-            case "priceHighToLow":
-                sortOption = { "pricing.rentalPricePerDay": -1 };
-                break;
-            case "highestRated":
-                sortOption = { averageRating: -1 };
-                break;
-            case "newest":
-                sortOption = { createdAt: -1 };
-                break;
-        }
-
-        const listings = await Listing.find(query)
-            .sort(sortOption)
-            .skip(skip)
-            .limit(limit)
-            .select("itemName image pricing averageRating businessMode totalStock category")
-            .lean();
-
-        const total = await Listing.countDocuments(query);
-
-        res.render("index", {
-            listings,
-            currentPage: Number(page),
-            totalPages: Math.ceil(total / limit),
-            query: req.query
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.redirect("/");
+    if (search) {
+      query.$or = [
+        { itemName: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } }
+      ];
     }
-};
 
+    if (category) query.category = category;
+
+    if (mode && ["rental", "custom"].includes(mode)) {
+      query.businessMode = { $in: [mode, "both"] };
+    }
+
+    if (minPrice || maxPrice) {
+      query["pricing.rentalPricePerDay"] = {};
+      if (minPrice) query["pricing.rentalPricePerDay"].$gte = Number(minPrice);
+      if (maxPrice) query["pricing.rentalPricePerDay"].$lte = Number(maxPrice);
+    }
+
+    if (ratingAbove) {
+      query.averageRating = { $gte: Number(ratingAbove) };
+    }
+
+    if (city) query.city = city;
+
+    let sortOption = { createdAt: -1 };
+
+    switch (sort) {
+      case "priceLowToHigh":
+        sortOption = { "pricing.rentalPricePerDay": 1 };
+        break;
+      case "priceHighToLow":
+        sortOption = { "pricing.rentalPricePerDay": -1 };
+        break;
+      case "highestRated":
+        sortOption = { averageRating: -1 };
+        break;
+    }
+
+    const listings = await Listing.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      // 🔥 IMPORTANT FIX HERE
+      .select("itemName images pricing averageRating businessMode totalStock category")
+      .lean();
+
+    const total = await Listing.countDocuments(query);
+
+    res.render("index", {
+      listings,
+      currentPage,
+      totalPages: Math.ceil(total / limit)
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.redirect("/");
+  }
+};
 // =========================================
 // ⭐ RENDER NEW LISTING FORM
 // =========================================
@@ -319,6 +321,7 @@ module.exports.updateListing = async (req, res) => {
     const listing = req.body.listing;
 
     const businessMode = listing.businessMode || "custom";
+
     if (businessMode === "custom" || businessMode === "both") {
         listing.fabricOptions = sanitizeArray(listing.fabricOptions);
         listing.sizeOptions = sanitizeArray(listing.sizeOptions);
@@ -331,7 +334,10 @@ module.exports.updateListing = async (req, res) => {
         businessMode,
         pricing: buildPricing(listing),
         measurementFields: buildMeasurementFields(listing),
-        stitchingDurationDays: Math.max(1, parseInt(listing.stitchingDurationDays, 10) || 3),
+        stitchingDurationDays: Math.max(
+            1,
+            parseInt(listing.stitchingDurationDays, 10) || 3
+        ),
         occasions: sanitizeArray(listing.occasions),
         fabricOptions: listing.fabricOptions || [],
         sizeOptions: listing.sizeOptions || [],
@@ -339,29 +345,78 @@ module.exports.updateListing = async (req, res) => {
     };
 
     const doc = await Listing.findById(id);
-    if (doc && (businessMode === "rental" || businessMode === "both")) {
+    if (!doc) {
+        req.flash("error", "Listing not found");
+        return res.redirect("/dashboard");
+    }
+
+    // ===== Rental stock handling (keep your logic) =====
+    if (businessMode === "rental" || businessMode === "both") {
         const s = listing.stock || {};
-        const total = Math.max(0, parseInt(s.totalQuantity, 10) ?? doc.stock?.totalQuantity ?? 1);
+        const total = Math.max(
+            0,
+            parseInt(s.totalQuantity, 10) ?? doc.stock?.totalQuantity ?? 1
+        );
+
         updateData.stock = {
             totalQuantity: total,
-            availableQuantity: Math.min(doc.stock?.availableQuantity ?? total, total),
+            availableQuantity: Math.min(
+                doc.stock?.availableQuantity ?? total,
+                total
+            ),
         };
     }
 
-    const updatedListing = await Listing.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+    // ===== Update main fields first =====
+    const updatedListing = await Listing.findByIdAndUpdate(
+        id,
+        updateData,
+        { new: true, runValidators: true }
+    );
 
-    if (req.file) {
-        if (updatedListing.image?.filename) {
-            await cloudinary.uploader.destroy(updatedListing.image.filename);
+    // ===== MULTI IMAGE UPDATE LOGIC =====
+    const labels = ["front", "back", "side", "full"];
+
+    for (const label of labels) {
+        const fileField = label + "Image";
+
+        if (req.files && req.files[fileField]) {
+            const file = req.files[fileField][0];
+
+            // Find existing image
+            const existingIndex = updatedListing.images.findIndex(
+                img => img.label === label
+            );
+
+            // Delete old image from Cloudinary
+            if (existingIndex !== -1) {
+                const oldImage = updatedListing.images[existingIndex];
+                if (oldImage.filename) {
+                    await cloudinary.uploader.destroy(oldImage.filename);
+                }
+
+                // Replace
+                updatedListing.images[existingIndex] = {
+                    url: file.path,
+                    filename: file.filename,
+                    label,
+                };
+            } else {
+                // Add new image
+                updatedListing.images.push({
+                    url: file.path,
+                    filename: file.filename,
+                    label,
+                });
+            }
         }
-        updatedListing.image = { url: req.file.path, filename: req.file.filename };
-        await updatedListing.save();
     }
+
+    await updatedListing.save();
 
     req.flash("success", "Listing updated. It is now pending admin approval.");
     res.redirect(`/listing/${id}`);
 };
-
 // =========================================
 // ⭐ DELETE LISTING
 // =========================================
